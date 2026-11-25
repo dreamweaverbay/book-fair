@@ -20,8 +20,17 @@ export function pageSvg(book, i, mode = 'color', bgMode) {
 // The sentence, one tappable word at a time. Tapping a word lights it up; nothing is read aloud.
 export function sentence(book, i, { tappable = true } = {}) {
   const p = el('p', { class: 'sentence' });
-  for (const piece of words(book, i)) {
-    if (piece.blank) { p.append(el('span', { class: 'blank', 'aria-label': 'blank' }, ' ')); continue; }
+  const pieces = words(book, i).map(x => ({ ...x }));
+  for (let k = 0; k < pieces.length; k++) {
+    const piece = pieces[k];
+    if (piece.blank) {
+      // Keep the blank and the punctuation after it on the same line.
+      const next = pieces[k + 1];
+      const punct = next && next.t ? (next.t.match(/^[.!,]+/) || [''])[0] : '';
+      if (punct) next.t = next.t.slice(punct.length);
+      p.append(el('span', { class: 'nowrap' }, el('span', { class: 'blank', 'aria-label': 'blank' }, '\u00A0'), punct));
+      continue;
+    }
     const parts = piece.t.split(/(\s+)/);
     for (const part of parts) {
       if (!part) continue;

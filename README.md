@@ -6,30 +6,34 @@ Plain static site: no accounts, no AI, no voices, no tracking. Works offline onc
 
 ## Making a book
 
-One question per screen, about ten minutes start to finish. The screens name the parts of a story as he goes: main character, setting, problem, then Beginning, Problem, First try, Help, Solution, Ending on the pages.
+One question per screen, about ten minutes start to finish. The screens name the parts of a story as he goes: main character and setting first, then a label on each page (Beginning, Problem, First try, Help, Solution, Ending).
 
 1. **Main character:** Robot, Monster, Monster Truck, Shark, Fish, Berry (a fruit buddy), Sam (a stick-figure kid), Dragon, Big Lizard (an original character), Dino, Astronaut, Superhero.
 2. **Setting:** the fair, the beach, under the sea, the woods, the jungle (with a volcano), the truck arena, the ball park, the big city, the moon.
-3. **Problem:** two or three per setting, like *Blown away!*, *Rolled away!*, *In the way!*, *Volcano puff!*, *Floated away!*
-4. **Six pages.** Each page is one or two short sentences with one blank. He picks from up to four picture cards, the blank fills in, and the picture changes to match.
-5. **Title:** four titles built from his story, like "Shark and the Kite", "The Kite in the Palm Tree", "Dragon to the Rescue", "Shark and Dragon".
+3. **Six pages.** Each page asks one question and has one blank. He picks from up to four picture cards, the words drop into the blank, and the picture changes to match.
+4. **Title:** four titles built from his story, like "Shark and the Kite", "The Kite in the Palm Tree", "Dragon to the Rescue", "Shark and Dragon".
+
+### Two rules for all content
+
+1. **If the words name it, the picture shows it, in that amount.**
+2. **Every card shows the exact words that drop into the blank,** so the cards always answer the question on the screen. "What did Shark take to the beach?" gets cards that say *a kite*, *a ball*, *a new hat*; the sentence becomes "Shark went to the beach with a kite."
 
 ### How the stories stay sensible
 
 Every choice is drawn from the ones before it (all of it lives in `js/story.js`):
 
-| Page | Part | What decides the choices |
-| --- | --- | --- |
-| 1 | Beginning | The problem decides the toy (kite, balloon, ball, basketball…) or ride (bike, scooter, skateboard) |
-| 2 | Problem | The setting decides where the toy can end up: a palm tree, a tide pool, a crab hole. Or what blocks the path |
-| 3 | First try | The kind of spot decides the tries: too high means jump, long stick, stand on a box; too small means reach in, squeeze, crawl |
-| 4 | Help | Only helpers whose skill fits the spot: Dragon can fly, Dino has a long neck, Berry is very small, Monster Truck can pull hard |
-| 5 | Solution | The helper uses that skill, and a small surprise fits the spot: a bird in a tree, a frog in the pond, a worm in the mud |
-| 6 | Ending | Play with the toy together, or have a picnic, a party, or a nap |
+| Page | Part | The question | What decides the choices |
+| --- | --- | --- | --- |
+| 1 | Beginning | What did Shark take to the beach? | The setting decides the toys and rides: *a kite*, *a ball*, *a scooter* |
+| 2 | Problem | Oh no! What happened to the kite? | The toy and the setting decide what can go wrong: *blew into a palm tree*, *blew into the waves*. A ball rolls, a kite blows away, a ride gets its path blocked |
+| 3 | First try | What did Shark do to get it back? | The kind of spot decides the tries: too high means *jumped up*, *used a long stick*, *stood on a box* |
+| 4 | Help | Who came to help? | Only helpers whose skill fits the spot. The card says why: *Dragon, can fly* or *Dino, has a long, long neck* |
+| 5 | Solution | Surprise! What was on the kite? | The helper uses that skill, and a small surprise fits the spot: *a bird* in a tree, *a frog* in the pond, *a worm* in the mud |
+| 6 | Ending | What did Shark and Dragon do next? | *flew the kite together*, *had a picnic*, *had a party*, *took a nap* |
 
-A spot is never offered if the main character could fix it alone (a shark never needs help getting something out of a pond) or if fewer than two helpers fit. `dev/check.mjs` (kept out of the repo) walks every main character, setting and choice to confirm that, and that every sentence comes out whole. That makes 285 core plots (setting, problem, toy, spot) and roughly 290,000 complete books across all the choices.
+A spot is never offered if the main character could fix it alone (a shark never needs help getting something out of a pond) or if fewer than two helpers fit. `dev/check.mjs` (kept out of the repo) walks every main character, setting and choice to confirm that, that every sentence comes out whole, and that every card's words appear in its sentence. That makes 258 core plots (setting, toy, where it ends up) and roughly 260,000 complete books across all the choices.
 
-Example: *Shark went to the beach to fly a kite. / Oh no! The wind blew the kite up into a palm tree! / Shark jumped up, but the kite was too high. / Dragon came to help. Dragon can fly! / Dragon flew up and got the kite. It had a bird on it! / Then Shark and Dragon flew the kite together!*
+Example: *Shark went to the beach with a kite. / Oh no! The kite blew into a palm tree! / Shark jumped up, but the kite was too high. / Dragon came to help. Dragon can fly! / Dragon flew up and got the kite. It had a bird on it! / Then Shark and Dragon flew the kite together!*
 
 Tapping any word in a sentence highlights it. Nothing is ever read aloud.
 
@@ -37,9 +41,7 @@ Tapping any word in a sentence highlights it. Nothing is ever read aloud.
 
 After he picks a word, **Add stickers** opens a tray of stickers that fit the setting (shells and crabs at the beach, planets and comets on the moon, parrots and monkeys in the jungle) plus a star and a heart. Tap a sticker to drop it on the page, or drag it where he wants it. Tap one on the page to take it off. Up to six per page.
 
-### The one rule for all content
-
-If the words name it, the picture shows it, in that amount. When adding or changing anything in `js/story.js`, check the picture against the sentence. `dev/books.html` renders whole books or every option for one page.
+`dev/books.html` and `dev/spots.html` (kept out of the repo) render whole books, or one page for every spot, for checking pictures against sentences.
 
 ## The fair
 

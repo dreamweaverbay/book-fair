@@ -80,8 +80,9 @@ const pole = (x, top, mode, lamp = true) =>
   (mode === 'line' ? line(`M${x} 252 V${top + 12}`) : `<path d="M${x} 252 V${top + 12}" stroke="#7a828c" stroke-width="7"/>`) +
   (lamp ? shape(`M${x - 18} ${top + 12} H${x + 18} L${x + 12} ${top} H${x - 12} Z`, '#5d6b78', mode) + shape(`M${x - 13} ${top + 12} H${x + 13} V${top + 17} H${x - 13} Z`, '#fff3b0', mode) : '');
 
-const crack = (mode) =>
-  shape('M246 254 L262 246 L276 252 L290 244 L304 251 L320 245 L336 254 L320 262 L304 270 L290 276 L276 270 L260 263 Z', '#2b2622', mode === 'line' ? 'color' : mode);
+const jag = (cx, cy, rx, ry, n = 14) => 'M' + [...Array(n)].map((_, k) => { const a = (k / n) * Math.PI * 2, f = k % 2 ? 0.74 : 1; return `${r(cx + Math.cos(a) * rx * f)} ${r(cy + Math.sin(a) * ry * f)}`; }).join(' L') + ' Z';
+const pit = (mode, dark, rim) => (rim ? ell(291, 262, 62, 17, rim, mode) : '') + shape(jag(291, 262, 52, 13), dark, mode === 'line' ? 'color' : mode);
+const pitLip = (mode, ground) => (mode === 'line' ? '' : `<path d="M243 266 Q291 286 339 266 L339 272 Q291 290 243 272 Z" fill="${ground}"/>`);
 
 const crater = (cx, mode, inside = '#8f8b82') => ell(cx, 262, 86, 20, '#b3afa5', mode) + ell(cx, 264, 72, 15, inside, mode);
 
@@ -125,12 +126,10 @@ const weeds = (mode, layer) => {
   }).join('');
 };
 
-const ditch = (mode) => shape('M232 256 L256 246 L290 252 L326 244 L352 256 L326 268 L290 278 L256 268 Z', '#3b2a1e', mode === 'line' ? 'color' : mode);
-
 // ---------- the spots ----------
 export const SPOT_ART = {
   // the fair
-  wheeltop: (m) => ({ back: pic('ferris', 292, G, 212, { mode: m }), obj: [292, 58], size: 40, stand: 205 }),
+  wheeltop: (m) => ({ back: '', obj: [315, 62], size: 36, stand: 215 }),
   tentroof: (m) => ({ back: tent(m), obj: [290, 130], size: 40, stand: 180 }),
   pond: (m) => ({ back: pond(290, 258, 92, 20, '#7cc4e4', '#a98a5d', m), obj: [296, 262], size: 38, front: waterFront(290, 258, 92, 20, 254, '#7cc4e4', m), stand: 185 }),
   booth: (m) => ({ back: booth(m), obj: [292, G], size: 28, stand: 200 }),
@@ -145,7 +144,7 @@ export const SPOT_ART = {
   cave: (m) => ({ back: rockMound('#8a8478', m), obj: [290, 252], size: 26, stand: 195 }),
   clam: (m) => ({ back: pic('clam', 292, G + 2, 96, { mode: m }), obj: [290, G - 40], size: 26, stand: 205 }),
   wreck: (m) => ({ back: wreck(m), obj: [304, 220], size: 20, front: ringAt(304, 209, 13, m), stand: 180 }),
-  crack: (m) => ({ back: crack(m), obj: [291, 270], size: 22, front: m === 'line' ? '' : '<path d="M262 260 L276 266 L290 272 L304 266 L320 260 L320 264 L304 271 L290 277 L276 271 L260 264 Z" fill="#e9d49e"/>', stand: 200 }),
+  crack: (m) => ({ back: pit(m, '#2b2622'), obj: [291, 270], size: 22, front: pitLip(m, '#e9d49e'), stand: 200 }),
   net: (m) => ({ back: '', obj: [290, G], size: 34, front: netMesh(m), stand: 200 }),
   underrock: (m) => ({ back: '', obj: [336, G], size: 28, front: pic('rock', 292, G + 2, 92, { mode: m }), stand: 205 }),
   // the woods
@@ -179,8 +178,8 @@ export const SPOT_ART = {
   parkmud: (m) => SPOT_ART.mud(m),
   boardwalk: (m) => ({ back: boardwalk(m), obj: [300, G], size: 24, stand: 175 }),
   seaweed: (m) => ({ back: weeds(m, 'back'), obj: [296, 160], size: 30, front: weeds(m, 'front'), stand: 205 }),
-  ditch: (m) => ({ back: ditch(m), obj: [291, 272], size: 24, front: m === 'line' ? '' : '<path d="M256 262 L290 276 L326 262 L326 266 L290 281 L256 266 Z" fill="#c99a62"/>', stand: 190 }),
-  roadhole: (m) => ({ back: shape('M232 256 L256 246 L290 252 L326 244 L352 256 L326 268 L290 278 L256 268 Z', '#2e2a26', m === 'line' ? 'color' : m), obj: [291, 272], size: 24, front: m === 'line' ? '' : '<path d="M256 262 L290 276 L326 262 L326 266 L290 281 L256 266 Z" fill="#d9d4ca"/>', stand: 190 }),
+  ditch: (m) => ({ back: pit(m, '#3b2a1e', '#b5844f'), obj: [291, 270], size: 24, front: pitLip(m, '#b5844f'), stand: 190 }),
+  roadhole: (m) => ({ back: pit(m, '#2e2a26', '#a9a297'), obj: [291, 270], size: 24, front: pitLip(m, '#a9a297'), stand: 190 }),
   moonhole: (m) => ({ back: hole(290, 256, m, '#c9c6bd'), obj: [290, 266], size: 26, front: holeLip(290, 256, m, '#c9c6bd'), stand: 200 }),
   // the moon
   satellite: (m) => ({ back: pic('satellite', 286, 120, 70, { mode: m }), obj: [334, 98], size: 32, stand: 230 }),

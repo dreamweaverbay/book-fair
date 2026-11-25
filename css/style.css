@@ -414,3 +414,12 @@ p { margin: 0; }
   .cards-12, .cards.places { grid-template-columns: repeat(3, 1fr); }
   .cards.choices { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* choice cards carry the exact words for the blank */
+.choices .card-word { font-size: 21px; padding: 0 4px; }
+.card-note { font-family: var(--read); font-size: 17px; color: var(--muted); line-height: 1.15; text-align: center; }
+.sentence .nowrap { white-space: nowrap; }
+@media (max-height: 700px) and (orientation: landscape) {
+  .choices .card-pic > svg { aspect-ratio: 6 / 3.4; }
+  .choices .card { padding: 6px 8px 8px; }
+}

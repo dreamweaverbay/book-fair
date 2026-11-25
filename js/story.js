@@ -1,11 +1,12 @@
 // Story paths: every choice depends on the ones before it, so any book he makes hangs together.
-//   Page 1  Beginning: the main character goes to the setting to do something they love
+//   Page 1  Beginning: the main character goes to the setting with a toy or a ride
 //   Page 2  Problem:   where the toy ends up, or what blocks the path
 //   Page 3  First try: what the main character tries, and why it doesn't work
 //   Page 4  Help:      who comes to help (only helpers whose skill fits the problem)
 //   Page 5  Solution:  how the helper fixes it, plus a small surprise that fits the spot
 //   Page 6  Ending:    what they do together after
-// The one rule: if the words name it, the picture shows it, in that amount.
+// Two rules: if the words name it, the picture shows it, in that amount.
+// And every choice card shows the exact words that drop into the blank, so the cards always answer the question.
 import { pic, figure, aspect, scene, GROUND as G } from './art.js';
 import { SPOT_ART, BLOCK_ART, pathBand, stick, ropeLine, netPole, arcs, effort, robotArm, pearl } from './spots.js';
 
@@ -45,24 +46,31 @@ export const PAGE_PARTS = ['Beginning', 'Problem', 'First try', 'Help', 'Solutio
 export const pageJob = (i) => PAGE_PARTS[i - 1];
 
 /* ---------------- things they love ----------------
-   love = page 1, play = page 6, end = the ending card, show = how page 1 draws it. */
+   play = what page 6 says, show = how page 1 draws it. */
 
 export const THINGS = {
-  kite: { word: 'kite', art: 'kite', h: 44, love: 'fly a kite', play: 'flew the kite together', end: 'fly the kite', show: 'sky' },
-  balloon: { word: 'balloon', art: 'balloon', h: 54, love: 'play with a balloon', play: 'played with the balloon', end: 'play with the balloon', show: 'string' },
-  hat: { word: 'hat', art: 'cap', h: 34, love: 'show off a cool hat', play: 'took turns wearing the hat', end: 'take turns with the hat', show: 'head' },
-  ball: { word: 'ball', art: 'ball', h: 36, love: 'kick a ball', play: 'played catch', end: 'play catch', show: 'ground', toss: true },
-  beachball: { word: 'beach ball', art: 'beachball', h: 40, love: 'toss a beach ball', play: 'tossed the beach ball', end: 'toss the beach ball', show: 'ground', toss: true },
-  basketball: { word: 'basketball', art: 'basketball', h: 38, love: 'shoot a basketball', play: 'played basketball', end: 'play basketball', show: 'ground', toss: true },
-  baseball: { word: 'baseball', art: 'baseball', h: 30, love: 'throw a baseball', play: 'played catch with the baseball', end: 'play catch', show: 'ground', toss: true },
-  apple: { word: 'apple', art: 'apple', h: 34, love: 'eat a big apple', play: 'shared the apple', end: 'share the apple', show: 'ground' },
-  shell: { word: 'shell', art: 'shell', h: 36, love: 'look at a shiny shell', play: 'looked at the shell together', end: 'look at the shell', show: 'ground' },
-  crown: { word: 'crown', art: 'crown', h: 30, love: 'show off a gold crown', play: 'took turns wearing the crown', end: 'take turns with the crown', show: 'head' },
-  teddy: { word: 'teddy bear', art: 'teddy', h: 42, love: 'play with a teddy bear', play: 'hugged the teddy bear', end: 'hug the teddy bear', show: 'ground' },
-  rocket: { word: 'toy rocket', art: 'rocket', h: 40, love: 'fly a toy rocket', play: 'flew the toy rocket', end: 'fly the toy rocket', show: 'sky' },
-  bike: { word: 'bike', art: 'bike', h: 58, love: 'ride a bike', play: 'took turns on the bike', end: 'take turns on the bike', show: 'ride' },
-  scooter: { word: 'scooter', art: 'scooter', h: 66, love: 'ride a scooter', play: 'took turns on the scooter', end: 'take turns on the scooter', show: 'ride' },
-  skateboard: { word: 'skateboard', art: 'skateboard', h: 26, love: 'ride a skateboard', play: 'took turns on the skateboard', end: 'take turns on the skateboard', show: 'ride' },
+  kite: { word: 'kite', art: 'kite', h: 44, play: 'flew the kite together', show: 'sky' },
+  balloon: { word: 'balloon', art: 'balloon', h: 54, play: 'played with the balloon', show: 'string' },
+  hat: { word: 'hat', art: 'cap', h: 34, play: 'took turns wearing the hat', show: 'head' },
+  ball: { word: 'ball', art: 'ball', h: 36, play: 'played catch', show: 'ground', toss: true },
+  beachball: { word: 'beach ball', art: 'beachball', h: 40, play: 'tossed the beach ball', show: 'ground', toss: true },
+  basketball: { word: 'basketball', art: 'basketball', h: 38, play: 'played basketball', show: 'ground', toss: true },
+  baseball: { word: 'baseball', art: 'baseball', h: 30, play: 'played catch with the baseball', show: 'ground', toss: true },
+  apple: { word: 'apple', art: 'apple', h: 34, play: 'shared the apple', show: 'ground' },
+  shell: { word: 'shell', art: 'shell', h: 36, play: 'looked at the shell together', show: 'ground' },
+  crown: { word: 'crown', art: 'crown', h: 30, play: 'took turns wearing the crown', show: 'head' },
+  teddy: { word: 'teddy bear', art: 'teddy', h: 42, play: 'hugged the teddy bear', show: 'ground' },
+  rocket: { word: 'toy rocket', art: 'rocket', h: 40, play: 'flew the toy rocket', show: 'sky' },
+  bike: { word: 'bike', art: 'bike', h: 58, play: 'took turns on the bike', show: 'ride' },
+  scooter: { word: 'scooter', art: 'scooter', h: 66, play: 'took turns on the scooter', show: 'ride' },
+  skateboard: { word: 'skateboard', art: 'skateboard', h: 26, play: 'took turns on the skateboard', show: 'ride' },
+};
+
+// How page 1 names each thing: "Shark went to the beach with a kite."
+const WITH = {
+  kite: 'a kite', balloon: 'a red balloon', hat: 'a new hat', ball: 'a ball', beachball: 'a beach ball', basketball: 'a basketball',
+  baseball: 'a baseball', apple: 'a big apple', shell: 'a shiny shell', crown: 'a gold crown', teddy: 'a teddy bear', rocket: 'a toy rocket',
+  bike: 'a bike', scooter: 'a scooter', skateboard: 'a skateboard',
 };
 
 /* ---------------- surprises on page 5 ---------------- */
@@ -82,20 +90,22 @@ export const TWISTS = {
   crab: { word: 'crab', art: 'crab' },
   littlefish: { word: 'little fish', art: 'tropicalfish' },
   octopus: { word: 'octopus', art: 'octopus' },
+  jellyfish: { word: 'jellyfish', art: 'jellyfish' },
   mouse: { word: 'mouse', art: 'mouse' },
   snail: { word: 'snail', art: 'snail' },
   worm: { word: 'worm', art: 'worm' },
   star: { word: 'star', art: 'star' },
   moonrock: { word: 'moon rock', art: 'rock' },
   planet: { word: 'tiny planet', art: 'planet' },
+  ufo: { word: 'tiny spaceship', art: 'ufo' },
   pearl: { word: 'pearl', art: null },
 };
 
 const TW = {
-  tree: ['bird', 'squirrel', 'leaf'], jungletree: ['parrot', 'monkey', 'coconut'], high: ['bird', 'ladybug', 'butterfly'],
-  palm: ['bird', 'coconut', 'butterfly'], pond: ['frog', 'duck', 'turtle'], sea: ['crab', 'littlefish', 'octopus'],
+  tree: ['bird', 'squirrel', 'leaf'], jungletree: ['parrot', 'monkey', 'butterfly'], high: ['bird', 'ladybug', 'butterfly'],
+  palm: ['bird', 'butterfly', 'ladybug'], pond: ['frog', 'duck', 'turtle'], sea: ['crab', 'jellyfish', 'octopus'],
   small: ['mouse', 'snail', 'ladybug'], hole: ['crab', 'worm', 'snail'], dirt: ['worm', 'snail', 'ladybug'],
-  mud: ['worm', 'frog', 'snail'], space: ['star', 'moonrock', 'planet'], clam: ['pearl', 'crab', 'littlefish'],
+  mud: ['worm', 'frog', 'snail'], space: ['star', 'ufo', 'moonrock'], clam: ['pearl', 'crab', 'jellyfish'],
   beach: ['crab', 'snail', 'worm'], town: ['mouse', 'ladybug', 'snail'], jungle: ['frog', 'butterfly', 'snail'],
 };
 
@@ -114,57 +124,57 @@ const DEEP_LAND = ['astronaut', 'dragon', 'superhero', 'dino'];
 const TANGLE = ['shark', 'monster', 'robot'];
 
 export const SPOTS = {
-  wheeltop: { kind: 'HIGH', phrase: 'up to the top of the big wheel', card: 'big wheel', title: 'on the Big Wheel', helpers: VERY_HIGH, twists: TW.high },
-  tentroof: { kind: 'HIGH', phrase: 'onto the tent roof', card: 'tent roof', title: 'on the Tent', helpers: HIGH_ALL, twists: TW.high },
-  pond: { kind: 'WATER', phrase: 'into the duck pond', card: 'duck pond', title: 'in the Pond', helpers: SWIM, twists: TW.pond },
-  booth: { kind: 'SMALL', noun: 'gap', phrase: 'under the ticket booth', card: 'ticket booth', title: 'under the Booth', helpers: GAP, twists: TW.small },
-  mud: { kind: 'MUD', phrase: 'into a mud puddle', card: 'mud puddle', title: 'in the Mud', helpers: DIG, twists: TW.mud },
-  palmtop: { kind: 'HIGH', phrase: 'up into a palm tree', card: 'palm tree', title: 'in the Palm Tree', helpers: VERY_HIGH, twists: TW.palm },
-  tower: { kind: 'HIGH', phrase: 'onto the lifeguard tower', card: 'lifeguard tower', title: 'on the Tower', helpers: HIGH_ALL, twists: TW.high },
-  waves: { kind: 'WATER', phrase: 'out into the waves', card: 'waves', title: 'in the Waves', helpers: SWIM, twists: TW.sea },
-  tidepool: { kind: 'WATER', phrase: 'into a tide pool', card: 'tide pool', title: 'in the Tide Pool', helpers: SWIM, twists: TW.sea },
-  crabhole: { kind: 'SMALL', noun: 'hole', phrase: 'into a crab hole', card: 'crab hole', title: 'in the Crab Hole', helpers: ['berry', 'robot', 'fish'], twists: TW.hole },
-  cave: { kind: 'SMALL', noun: 'cave', phrase: 'into a little cave', card: 'little cave', title: 'in the Cave', helpers: ['berry', 'fish'], twists: TW.sea },
-  clam: { kind: 'SMALL', noun: 'clam', phrase: 'into a giant clam', card: 'giant clam', title: 'in the Clam', helpers: ['berry', 'fish'], twists: TW.clam },
-  wreck: { kind: 'SMALL', noun: 'window', phrase: 'into an old ship', card: 'old ship', title: 'in the Old Ship', helpers: ['berry', 'fish'], twists: TW.sea },
-  crack: { kind: 'DEEP', noun: 'crack', phrase: 'down into a deep crack', card: 'deep crack', title: 'in the Crack', helpers: UNDERWATER, twists: TW.sea },
-  net: { kind: 'NET', noun: 'net', phrase: 'into an old fishing net', card: 'fishing net', title: 'in the Net', helpers: TANGLE, twists: TW.sea },
-  seaweed: { kind: 'NET', noun: 'seaweed', phrase: 'into some tall seaweed', card: 'tall seaweed', title: 'in the Seaweed', helpers: TANGLE, twists: TW.sea },
-  boardwalk: { kind: 'SMALL', noun: 'gap', phrase: 'under the boardwalk', card: 'boardwalk', title: 'under the Boardwalk', helpers: GAP, twists: TW.beach },
-  ditch: { kind: 'DEEP', noun: 'ditch', phrase: 'into a deep ditch', card: 'deep ditch', title: 'in the Ditch', helpers: DEEP_LAND, twists: TW.dirt },
-  roadhole: { kind: 'DEEP', noun: 'hole', phrase: 'into a deep hole in the road', card: 'hole in the road', title: 'in the Hole', helpers: DEEP_LAND, twists: TW.town },
-  moonhole: { kind: 'SMALL', noun: 'hole', phrase: 'into a tiny moon hole', card: 'tiny hole', title: 'in the Moon Hole', helpers: ['berry', 'robot'], twists: TW.space },
-  underrock: { kind: 'UNDER', phrase: 'under a big rock', card: 'big rock', title: 'under the Rock', helpers: STRONG, twists: TW.sea },
-  treetop: { kind: 'HIGH', phrase: 'up into a tall tree', card: 'tall tree', title: 'in the Tree', helpers: VERY_HIGH, twists: TW.tree },
-  bigrock: { kind: 'HIGH', phrase: 'onto a tall rock', card: 'tall rock', title: 'on the Rock', helpers: HIGH_ALL, twists: TW.high },
-  river: { kind: 'WATER', phrase: 'into the river', card: 'river', title: 'in the River', helpers: SWIM, twists: TW.pond },
-  rabbithole: { kind: 'SMALL', noun: 'hole', phrase: 'into a rabbit hole', card: 'rabbit hole', title: 'in the Rabbit Hole', helpers: ['berry', 'robot'], twists: TW.dirt },
-  hollowlog: { kind: 'SMALL', noun: 'log', phrase: 'into a hollow log', card: 'hollow log', title: 'in the Log', helpers: GAP, twists: TW.small },
-  jungletree: { kind: 'HIGH', phrase: 'up into a jungle tree', card: 'jungle tree', title: 'in the Jungle Tree', helpers: VERY_HIGH, twists: TW.jungletree },
-  junglerock: { kind: 'HIGH', phrase: 'onto a tall rock', card: 'tall rock', title: 'on the Rock', helpers: HIGH_ALL, twists: TW.jungle },
-  jungleriver: { kind: 'WATER', phrase: 'into the river', card: 'river', title: 'in the River', helpers: SWIM, twists: TW.pond },
-  junglemud: { kind: 'MUD', phrase: 'into some sticky mud', card: 'sticky mud', title: 'in the Mud', helpers: DIG, twists: TW.mud },
-  junglelog: { kind: 'SMALL', noun: 'log', phrase: 'into a hollow log', card: 'hollow log', title: 'in the Log', helpers: GAP, twists: TW.jungle },
-  lightpole: { kind: 'HIGH', phrase: 'to the top of a light pole', card: 'light pole', title: 'on the Light Pole', helpers: VERY_HIGH, twists: TW.high },
-  stands: { kind: 'HIGH', phrase: 'up into the stands', card: 'stands', title: 'in the Stands', helpers: HIGH_ALL, twists: TW.high },
-  mudpit: { kind: 'MUD', phrase: 'into the mud pit', card: 'mud pit', title: 'in the Mud Pit', helpers: DIG, twists: TW.mud },
-  understands: { kind: 'SMALL', noun: 'gap', phrase: 'under the stands', card: 'under the stands', title: 'under the Stands', helpers: GAP, twists: TW.small },
-  tire: { kind: 'SMALL', noun: 'hole', phrase: 'into a giant tire', card: 'giant tire', title: 'in the Tire', helpers: GAP, twists: TW.small },
-  backboard: { kind: 'HIGH', phrase: 'onto the top of the backboard', card: 'backboard', title: 'on the Backboard', helpers: HIGH_ALL, twists: TW.high },
-  scoreboard: { kind: 'HIGH', phrase: 'onto the scoreboard', card: 'scoreboard', title: 'on the Scoreboard', helpers: HIGH_ALL, twists: TW.high },
-  bleachers: { kind: 'SMALL', noun: 'gap', phrase: 'under the bleachers', card: 'bleachers', title: 'under the Bleachers', helpers: GAP, twists: TW.small },
-  parkmud: { kind: 'MUD', phrase: 'into a mud puddle', card: 'mud puddle', title: 'in the Mud', helpers: DIG, twists: TW.mud },
-  lamppost: { kind: 'HIGH', phrase: 'to the top of a lamp post', card: 'lamp post', title: 'on the Lamp Post', helpers: ['dragon', 'lizard', 'robot', 'astronaut', 'dino', 'superhero'], twists: TW.high },
-  roof: { kind: 'HIGH', phrase: 'onto a tall roof', card: 'tall roof', title: 'on the Roof', helpers: ['dragon', 'robot', 'astronaut', 'superhero'], twists: TW.high },
-  fountain: { kind: 'WATER', phrase: 'into the fountain', card: 'fountain', title: 'in the Fountain', helpers: SWIM, twists: TW.pond },
-  drain: { kind: 'SMALL', noun: 'drain', phrase: 'into a drain', card: 'drain', title: 'in the Drain', helpers: ['berry', 'fish', 'robot'], twists: TW.small },
-  undercar: { kind: 'SMALL', noun: 'gap', phrase: 'under a parked car', card: 'parked car', title: 'under the Car', helpers: GAP, twists: TW.small },
-  satellite: { kind: 'FAR', phrase: 'up to a satellite', card: 'satellite', title: 'by the Satellite', helpers: FLY, twists: TW.space },
-  faraway: { kind: 'FAR', phrase: 'far up into space', card: 'far up', title: 'in Space', helpers: FLY, twists: TW.space },
-  bigrocket: { kind: 'HIGH', phrase: 'onto a big rocket', card: 'big rocket', title: 'on the Big Rocket', helpers: ['astronaut', 'dragon', 'lizard', 'robot', 'dino', 'superhero'], twists: TW.space },
-  crater: { kind: 'DEEP', noun: 'crater', phrase: 'into a deep crater', card: 'crater', title: 'in the Crater', helpers: DEEP_LAND, twists: TW.space },
-  mooncave: { kind: 'SMALL', noun: 'cave', phrase: 'into a moon cave', card: 'moon cave', title: 'in the Moon Cave', helpers: GAP, twists: TW.space },
-  moonunder: { kind: 'UNDER', phrase: 'under a moon rock', card: 'moon rock', title: 'under the Moon Rock', helpers: STRONG, twists: TW.space },
+  wheeltop: { kind: 'HIGH', phrase: 'onto the big wheel', title: 'on the Big Wheel', helpers: VERY_HIGH, twists: TW.high },
+  tentroof: { kind: 'HIGH', phrase: 'onto the tent roof', title: 'on the Tent', helpers: HIGH_ALL, twists: TW.high },
+  pond: { kind: 'WATER', phrase: 'into the duck pond', title: 'in the Pond', helpers: SWIM, twists: TW.pond },
+  booth: { kind: 'SMALL', noun: 'gap', phrase: 'under the ticket booth', title: 'under the Booth', helpers: GAP, twists: TW.small },
+  mud: { kind: 'MUD', phrase: 'into a mud puddle', title: 'in the Mud', helpers: DIG, twists: TW.mud },
+  palmtop: { kind: 'HIGH', phrase: 'into a palm tree', title: 'in the Palm Tree', helpers: VERY_HIGH, twists: TW.palm },
+  tower: { kind: 'HIGH', phrase: 'onto the lifeguard tower', title: 'on the Tower', helpers: HIGH_ALL, twists: TW.high },
+  waves: { kind: 'WATER', phrase: 'into the waves', title: 'in the Waves', helpers: SWIM, twists: TW.sea },
+  tidepool: { kind: 'WATER', phrase: 'into a tide pool', title: 'in the Tide Pool', helpers: SWIM, twists: TW.sea },
+  crabhole: { kind: 'SMALL', noun: 'hole', phrase: 'into a crab hole', title: 'in the Crab Hole', helpers: ['berry', 'robot'], twists: TW.hole },
+  cave: { kind: 'SMALL', noun: 'cave', phrase: 'into a little cave', title: 'in the Cave', helpers: ['berry', 'fish'], twists: TW.sea },
+  clam: { kind: 'SMALL', noun: 'clam', phrase: 'into a giant clam', title: 'in the Clam', helpers: ['berry', 'fish'], twists: TW.clam },
+  wreck: { kind: 'SMALL', noun: 'window', phrase: 'into an old ship', title: 'in the Old Ship', helpers: ['berry', 'fish'], twists: TW.sea },
+  crack: { kind: 'DEEP', noun: 'crack', phrase: 'into a deep crack', title: 'in the Crack', helpers: UNDERWATER, twists: TW.sea },
+  net: { kind: 'NET', noun: 'net', phrase: 'into an old fishing net', title: 'in the Net', helpers: TANGLE, twists: TW.sea },
+  seaweed: { kind: 'NET', noun: 'seaweed', phrase: 'into some tall seaweed', title: 'in the Seaweed', helpers: TANGLE, twists: TW.sea },
+  boardwalk: { kind: 'SMALL', noun: 'gap', phrase: 'under the boardwalk', title: 'under the Boardwalk', helpers: GAP, twists: TW.beach },
+  ditch: { kind: 'DEEP', noun: 'ditch', phrase: 'into a deep ditch', title: 'in the Ditch', helpers: DEEP_LAND, twists: TW.dirt },
+  roadhole: { kind: 'DEEP', noun: 'hole', phrase: 'into a hole in the road', title: 'in the Hole', helpers: DEEP_LAND, twists: TW.town },
+  moonhole: { kind: 'SMALL', noun: 'hole', phrase: 'into a tiny moon hole', title: 'in the Moon Hole', helpers: ['berry', 'robot'], twists: TW.space },
+  underrock: { kind: 'UNDER', phrase: 'under a big rock', title: 'under the Rock', helpers: STRONG, twists: TW.sea },
+  treetop: { kind: 'HIGH', phrase: 'into a tall tree', title: 'in the Tree', helpers: VERY_HIGH, twists: TW.tree },
+  bigrock: { kind: 'HIGH', phrase: 'onto a tall rock', title: 'on the Rock', helpers: HIGH_ALL, twists: TW.high },
+  river: { kind: 'WATER', phrase: 'into the river', title: 'in the River', helpers: SWIM, twists: TW.pond },
+  rabbithole: { kind: 'SMALL', noun: 'hole', phrase: 'into a rabbit hole', title: 'in the Rabbit Hole', helpers: ['berry', 'robot'], twists: TW.dirt },
+  hollowlog: { kind: 'SMALL', noun: 'log', phrase: 'into a hollow log', title: 'in the Log', helpers: GAP, twists: TW.small },
+  jungletree: { kind: 'HIGH', phrase: 'into a jungle tree', title: 'in the Jungle Tree', helpers: VERY_HIGH, twists: TW.jungletree },
+  junglerock: { kind: 'HIGH', phrase: 'onto a tall rock', title: 'on the Rock', helpers: HIGH_ALL, twists: TW.jungle },
+  jungleriver: { kind: 'WATER', phrase: 'into the river', title: 'in the River', helpers: SWIM, twists: TW.pond },
+  junglemud: { kind: 'MUD', phrase: 'into some sticky mud', title: 'in the Mud', helpers: DIG, twists: TW.mud },
+  junglelog: { kind: 'SMALL', noun: 'log', phrase: 'into a hollow log', title: 'in the Log', helpers: GAP, twists: TW.jungle },
+  lightpole: { kind: 'HIGH', phrase: 'onto a light pole', title: 'on the Light Pole', helpers: VERY_HIGH, twists: TW.high },
+  stands: { kind: 'HIGH', phrase: 'into the stands', title: 'in the Stands', helpers: HIGH_ALL, twists: TW.high },
+  mudpit: { kind: 'MUD', phrase: 'into the mud pit', title: 'in the Mud Pit', helpers: DIG, twists: TW.mud },
+  understands: { kind: 'SMALL', noun: 'gap', phrase: 'under the stands', title: 'under the Stands', helpers: GAP, twists: TW.small },
+  tire: { kind: 'SMALL', noun: 'hole', phrase: 'into a giant tire', title: 'in the Tire', helpers: GAP, twists: TW.small },
+  backboard: { kind: 'HIGH', phrase: 'onto the backboard', title: 'on the Backboard', helpers: HIGH_ALL, twists: TW.high },
+  scoreboard: { kind: 'HIGH', phrase: 'onto the scoreboard', title: 'on the Scoreboard', helpers: HIGH_ALL, twists: TW.high },
+  bleachers: { kind: 'SMALL', noun: 'gap', phrase: 'under the bleachers', title: 'under the Bleachers', helpers: GAP, twists: TW.small },
+  parkmud: { kind: 'MUD', phrase: 'into a mud puddle', title: 'in the Mud', helpers: DIG, twists: TW.mud },
+  lamppost: { kind: 'HIGH', phrase: 'onto a lamp post', title: 'on the Lamp Post', helpers: ['dragon', 'lizard', 'robot', 'astronaut', 'dino', 'superhero'], twists: TW.high },
+  roof: { kind: 'HIGH', phrase: 'onto a tall roof', title: 'on the Roof', helpers: ['dragon', 'robot', 'astronaut', 'superhero'], twists: TW.high },
+  fountain: { kind: 'WATER', phrase: 'into the fountain', title: 'in the Fountain', helpers: SWIM, twists: TW.pond },
+  drain: { kind: 'SMALL', noun: 'drain', phrase: 'into a drain', title: 'in the Drain', helpers: ['berry', 'robot'], twists: TW.small },
+  undercar: { kind: 'SMALL', noun: 'gap', phrase: 'under a parked car', title: 'under the Car', helpers: GAP, twists: TW.small },
+  satellite: { kind: 'FAR', phrase: 'up to a satellite', title: 'by the Satellite', helpers: FLY, twists: TW.space },
+  faraway: { kind: 'FAR', phrase: 'far out into space', title: 'in Space', helpers: FLY, twists: TW.space },
+  bigrocket: { kind: 'HIGH', phrase: 'onto a big rocket', title: 'on the Big Rocket', helpers: ['astronaut', 'dragon', 'lizard', 'robot', 'dino', 'superhero'], twists: TW.space },
+  crater: { kind: 'DEEP', noun: 'crater', phrase: 'into a deep crater', title: 'in the Crater', helpers: DEEP_LAND, twists: TW.space },
+  mooncave: { kind: 'SMALL', noun: 'cave', phrase: 'into a moon cave', title: 'in the Moon Cave', helpers: GAP, twists: TW.space },
+  moonunder: { kind: 'UNDER', phrase: 'under a moon rock', title: 'under the Moon Rock', helpers: STRONG, twists: TW.space },
 };
 
 export const BLOCKERS = {
@@ -179,16 +189,17 @@ export const BLOCKERS = {
 
 /* ---------------- the problems in each setting ---------------- */
 
+// How each kind of problem is told: "Oh no! The kite blew into a palm tree!"
 const UHOH = {
-  wind: { label: 'Blown away!', lead: 'Oh no! The wind blew the {O} ' },
-  roll: { label: 'Rolled away!', lead: 'Oh no! The {O} rolled ' },
-  flew: { label: 'Too high!', lead: 'Oh no! The {O} flew ' },
-  current: { label: 'A big wave!', lead: 'Oh no! A big wave pushed the {O} ' },
-  sink: { label: 'It sank!', lead: 'Oh no! The {O} sank ' },
-  float: { label: 'Floated away!', lead: 'Oh no! The {O} floated ' },
-  bounce: { label: 'Bounced away!', lead: 'Oh no! The {O} bounced ' },
-  puff: { label: 'Volcano puff!', lead: 'Oh no! The volcano went PUFF and blew the {O} ' },
-  block: { label: 'In the way!', lead: 'Oh no! ' },
+  wind: { verb: 'blew' },
+  puff: { verb: 'blew', before: 'The volcano went PUFF! ' },
+  roll: { verb: 'rolled' },
+  flew: { verb: 'flew' },
+  current: { verb: 'washed' },
+  sink: { verb: 'sank' },
+  float: { verb: 'floated' },
+  bounce: { verb: 'bounced' },
+  block: {},
 };
 
 const RIDES = ['bike', 'scooter', 'skateboard'];
@@ -201,7 +212,7 @@ export const PROBLEMS = {
   ],
   beach: [
     { type: 'wind', things: ['kite', 'hat', 'balloon'], spots: ['palmtop', 'tower', 'waves', 'tidepool', 'crabhole'] },
-    { type: 'roll', things: ['beachball', 'ball', 'shell'], spots: ['waves', 'crabhole', 'tidepool', 'boardwalk'] },
+    { type: 'roll', things: ['beachball', 'ball', 'apple'], spots: ['waves', 'crabhole', 'tidepool', 'boardwalk'] },
     { type: 'block', things: RIDES, blockers: ['rock', 'log'], twists: TW.beach },
   ],
   sea: [
@@ -234,7 +245,7 @@ export const PROBLEMS = {
     { type: 'block', things: RIDES, blockers: ['box', 'bigtire'], twists: TW.town },
   ],
   space: [
-    { type: 'float', things: ['ball', 'teddy', 'rocket'], spots: ['satellite', 'faraway', 'bigrocket', 'crater', 'mooncave', 'moonhole'] },
+    { type: 'float', things: ['ball', 'teddy', 'rocket'], spots: ['satellite', 'faraway', 'bigrocket'] },
     { type: 'bounce', things: ['ball', 'teddy', 'rocket'], spots: ['crater', 'mooncave', 'moonunder', 'bigrocket', 'moonhole'] },
     { type: 'block', things: RIDES, blockers: ['moonrock', 'brokensat'], twists: TW.space },
   ],
@@ -257,23 +268,23 @@ export const stickersFor = (placeId) => [...(STICKERS[placeId] || []), 'star', '
 /* ---------------- first tries ---------------- */
 
 export const TRIES = {
-  jump: { text: 'jumped up', card: 'jump' },
-  stick: { text: 'used a long stick', card: 'long stick' },
-  box: { text: 'stood on a box', card: 'box' },
-  net: { text: 'used a net', card: 'net' },
-  lean: { text: 'leaned way out', card: 'lean out' },
-  reach: { text: 'reached in', card: 'reach in' },
-  squeeze: { text: 'tried to squeeze in', card: 'squeeze in' },
-  crawl: { text: 'tried to crawl in', card: 'crawl in' },
-  shovel: { text: 'used a shovel', card: 'shovel' },
-  reachdown: { text: 'reached down', card: 'reach down' },
-  jumphigh: { text: 'jumped up high', card: 'jump' },
-  reachup: { text: 'reached up', card: 'reach up' },
-  pullnet: { text: 'pulled and tugged', card: 'pull' },
-  shake: { text: 'shook it hard', card: 'shake' },
-  push: { text: 'pushed and pushed', card: 'push' },
-  pull: { text: 'pulled and pulled', card: 'pull' },
-  lift: { text: 'tried to lift it', card: 'lift' },
+  jump: { text: 'jumped up' },
+  stick: { text: 'used a long stick' },
+  box: { text: 'stood on a box' },
+  net: { text: 'used a net' },
+  lean: { text: 'leaned way out' },
+  reach: { text: 'reached in' },
+  squeeze: { text: 'tried to squeeze in' },
+  crawl: { text: 'tried to crawl in' },
+  shovel: { text: 'used a shovel' },
+  reachdown: { text: 'reached down' },
+  jumphigh: { text: 'jumped up high' },
+  reachup: { text: 'reached up' },
+  pullnet: { text: 'pulled and tugged' },
+  shake: { text: 'shook it hard' },
+  push: { text: 'pushed and pushed' },
+  pull: { text: 'pulled and pulled' },
+  lift: { text: 'tried to lift it' },
 };
 
 const KIND_TRIES = {
@@ -304,12 +315,21 @@ const SKILL = {
 };
 const hid = (h) => (h === 'berry' ? 'strawberry' : h);
 
-const ENDINGS = { picnic: { text: 'had a picnic', card: 'picnic' }, party: { text: 'had a party', card: 'party' }, nap: { text: 'took a nap', card: 'nap' } };
+const ENDINGS = { picnic: { text: 'had a picnic' }, party: { text: 'had a party' }, nap: { text: 'took a nap' } };
 
 /* ---------------- what fits this book ---------------- */
 
-export const problemOf = (book) => (PROBLEMS[book.place] || []).find(p => p.type === book.uhoh);
-const isBlock = (book) => book.uhoh === 'block';
+// The kind of problem follows from the thing and where it ended up.
+export function typeOf(book) {
+  const withThing = (PROBLEMS[book.place] || []).filter(p => p.things.includes(book.picks[0]));
+  const spot = book.picks[1];
+  const fits = (p) => !spot || (p.spots || p.blockers).includes(spot);
+  const saved = withThing.find(p => p.type === book.uhoh && fits(p));
+  const hit = saved || withThing.find(fits) || withThing[0];
+  return hit ? hit.type : null;
+}
+export const problemOf = (book) => (PROBLEMS[book.place] || []).find(p => p.type === typeOf(book));
+const isBlock = (book) => typeOf(book) === 'block';
 
 // A spot only works if the main character can't fix it alone and at least two helpers can.
 export function spotOK(heroId, spotId) {
@@ -319,19 +339,28 @@ export function spotOK(heroId, spotId) {
 }
 const blockOK = (heroId) => !STRONG.includes(heroId);
 
-export function problemsFor(book) {
-  return (PROBLEMS[book.place] || []).filter(p => (p.type === 'block' ? blockOK(book.hero) : p.spots.filter(s => spotOK(book.hero, s)).length >= 2));
+// Everywhere this thing could end up for this main character (or what could block its path).
+function troublesFor(book, thing) {
+  const out = [];
+  for (const p of PROBLEMS[book.place] || []) {
+    if (!p.things.includes(thing)) continue;
+    const list = p.type === 'block' ? (blockOK(book.hero) ? p.blockers : []) : p.spots.filter(sp => spotOK(book.hero, sp));
+    for (const id of list) if (!out.includes(id)) out.push(id);
+  }
+  return out;
 }
-
-export const uhohLabel = (type) => UHOH[type].label;
 
 const kindOf = (book) => (isBlock(book) ? 'BLOCK' : book.picks[1] ? SPOTS[book.picks[1]].kind : null);
 
 export function choicesFor(book, i) {
+  if (i === 1) {
+    const all = [];
+    for (const p of PROBLEMS[book.place] || []) for (const t of p.things) if (!all.includes(t) && troublesFor(book, t).length >= 2) all.push(t);
+    return all;
+  }
   const p = problemOf(book);
   if (!p) return [];
-  if (i === 1) return p.things.slice();
-  if (i === 2) return isBlock(book) ? p.blockers.slice() : p.spots.filter(s => spotOK(book.hero, s));
+  if (i === 2) return troublesFor(book, book.picks[0]);
   if (i === 3) return KIND_TRIES[kindOf(book)] || [];
   if (i === 4) return (isBlock(book) ? BLOCKERS[book.picks[1]].helpers : SPOTS[book.picks[1]].helpers).map(hid).filter(h => h !== book.hero);
   if (i === 5) return isBlock(book) ? p.twists.slice() : SPOTS[book.picks[1]].twists.slice();
@@ -339,22 +368,49 @@ export function choicesFor(book, i) {
   return [];
 }
 
-// Up to four choices, mixed up (the ending keeps the toy's ending first).
-export function poolFor(book, i, rnd = Math.random) {
-  const list = choicesFor(book, i).slice();
-  if (i === 6) return list;
-  for (let k = list.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [list[k], list[j]] = [list[j], list[k]]; }
-  return list.slice(0, 4);
+function shuffled(list, rnd) {
+  const a = list.slice();
+  for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; }
+  return a;
 }
 
+// Up to four choices, mixed up. Page 1 offers a mix of toys and rides; the ending keeps the toy first.
+export function poolFor(book, i, rnd = Math.random) {
+  const list = choicesFor(book, i);
+  if (i === 6) return list.slice();
+  if (i === 1) {
+    const groups = (PROBLEMS[book.place] || []).map(p => shuffled(p.things.filter(t => list.includes(t)), rnd));
+    const out = [];
+    for (let r = 0; r < 3; r++) for (const g of groups) if (g[r] && !out.includes(g[r]) && out.length < 4) out.push(g[r]);
+    return shuffled(out, rnd);
+  }
+  return shuffled(list, rnd).slice(0, 4);
+}
+
+// A card shows exactly the words that will drop into the blank.
 export function cardWord(book, i, id) {
-  if (i === 1) return THINGS[id].word;
-  if (i === 2) return isBlock(book) ? BLOCKERS[id].word : SPOTS[id].card;
-  if (i === 3) return TRIES[id].card;
-  if (i === 4) return hero(id).name;
-  if (i === 5) return TWISTS[id].word;
-  if (i === 6) return THINGS[id] ? THINGS[id].end : ENDINGS[id].card;
-  return id;
+  const picks = book.picks.slice();
+  picks[i - 1] = id;
+  const piece = words({ ...book, picks }, i).find(p => p.slot);
+  return piece ? piece.t : '';
+}
+
+// The small second line on a helper card: why they can help.
+export function cardNote(book, i, id) {
+  return i === 4 ? SKILL[id][kindOf(book)][0] : '';
+}
+
+// The question for each page. Every card answers it in the sentence's own words.
+export function question(book, i) {
+  const H = hero(book.hero).name;
+  const O = book.picks[0] ? THINGS[book.picks[0]].word : '';
+  const block = isBlock(book);
+  if (i === 1) return `What did ${H} take ${place(book.place).to}?`;
+  if (i === 2) return block ? 'Oh no! What blocked the path?' : `Oh no! What happened to the ${O}?`;
+  if (i === 3) return block ? `What did ${H} do to move it?` : `What did ${H} do to get it back?`;
+  if (i === 4) return 'Who came to help?';
+  if (i === 5) return block ? `Surprise! What was under the ${BLOCKERS[book.picks[1]].word}?` : `Surprise! What was on the ${O}?`;
+  return `What did ${H} and ${hero(book.picks[3]).name} do next?`;
 }
 
 /* ---------------- words ---------------- */
@@ -370,17 +426,15 @@ export function words(book, i) {
   const out = [];
   const t = (s) => out.push({ t: s });
   const slot = (s) => out.push(s ? { t: s, slot: true } : { blank: true });
+  const a = (word) => `${art(word)} ${word}`;
   const block = isBlock(book);
   const B = block && book.picks[1] ? BLOCKERS[book.picks[1]].word : '';
 
   if (i === 1) {
-    t(`${H} went ${place(book.place).to} to `); slot(pick && THINGS[pick].love); t('.');
+    t(`${H} went ${place(book.place).to} with `); slot(pick && WITH[pick]); t('.');
   } else if (i === 2) {
-    if (block) {
-      t('Oh no! ');
-      if (pick) { t(cap(art(BLOCKERS[pick].word)) + ' '); slot(BLOCKERS[pick].word); } else slot(null);
-      t(' blocked the path!');
-    } else { t(UHOH[book.uhoh].lead.replace('{O}', O)); slot(pick && SPOTS[pick].phrase); t('!'); }
+    if (block) { t('Oh no! The path was blocked by '); slot(pick && a(BLOCKERS[pick].word)); t('!'); }
+    else { const u = UHOH[typeOf(book)]; t(`Oh no! ${u.before || ''}The ${O} `); slot(pick && `${u.verb} ${SPOTS[pick].phrase}`); t('!'); }
   } else if (i === 3) {
     t(H + ' '); slot(pick && TRIES[pick].text);
     if (block) t(`, but the ${B} was too heavy.`);
@@ -399,16 +453,14 @@ export function words(book, i) {
   } else if (i === 5) {
     const K = hero(book.picks[3]).name;
     const did = SKILL[book.picks[3]][kindOf(book)][1].replace('{B}', B).replace('{N}', block ? '' : SPOTS[book.picks[1]].noun || '');
-    const surprise = () => { if (pick) { t(art(TWISTS[pick].word) + ' '); slot(TWISTS[pick].word); } else slot(null); };
-    if (block) { t(`${K} ${did}. Under it was `); surprise(); t('!'); }
-    else { t(`${K} ${did} the ${O}. It had `); surprise(); t(' on it!'); }
+    if (block) { t(`${K} ${did}. Under it was `); slot(pick && a(TWISTS[pick].word)); t('!'); }
+    else { t(`${K} ${did} the ${O}. It had `); slot(pick && a(TWISTS[pick].word)); t(' on it!'); }
   } else if (i === 6) {
     t(`Then ${H} and ${hero(book.picks[3]).name} `); slot(pick && (THINGS[pick] ? THINGS[pick].play : ENDINGS[pick].text)); t('!');
   }
   return out;
 }
 
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export const plainText = (book, i) => words(book, i).map(p => (p.blank ? '___' : p.t)).join('');
 
 /* ---------------- titles ---------------- */
@@ -648,22 +700,6 @@ export function placeCard(id) {
   return `<svg viewBox="0 0 400 300" class="cardpic place" xmlns="http://www.w3.org/2000/svg">${inner(scene(id, ''))}</svg>`;
 }
 
-export function uhohCard(book, type) {
-  const f = figure(book.hero, 30, 96, { h: 54, face: 'right' });
-  const c = '#8a7563';
-  const lines = (d) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>`;
-  if (type === 'wind') return square(f.svg + pic('cloud', 66, 34, 30) + lines('M62 44 q10 -4 20 0 t20 0 M66 54 q8 -3 16 0 t16 0') + pic('leaf', 104, 70, 22));
-  if (type === 'puff') return square(f.svg + pic('volcano', 88, 98, 64) + pic('cloud', 92, 30, 22));
-  if (type === 'roll') return square(f.svg + pic('ball', 98, 96, 26) + lines('M56 84 h20 M60 92 h16'));
-  if (type === 'flew') return square(f.svg + pic('basketball', 92, 36, 26) + lines('M50 70 Q66 40 80 38'));
-  if (type === 'current') return square(f.svg + pic('wave', 90, 96, 64));
-  if (type === 'sink') return square(f.svg + pic('shell', 92, 96, 26) + [[90, 40, 4], [96, 54, 3], [88, 64, 2.5]].map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="none" stroke="#5aa9d6" stroke-width="2"/>`).join(''));
-  if (type === 'float') return square(f.svg + pic('teddy', 92, 50, 34) + pic('star', 108, 20, 12) + pic('star', 70, 16, 9));
-  if (type === 'bounce') return square(f.svg + pic('ball', 100, 50, 24) + lines('M60 96 Q72 50 86 62 M88 96 Q96 74 100 76'));
-  if (type === 'block') return square(f.svg + pic('rock', 92, 98, 56) + `<path d="M0 96 H120" stroke="${c}" stroke-width="2"/>`);
-  return square('');
-}
-
 export function choiceCard(book, i, id) {
   if (i === 1) { const th = THINGS[id]; return square(pic(th.art, 60, 92, Math.min(80, (100 / aspect(th.art)) * 0.8))); }
   if (i === 2) {
@@ -674,8 +710,10 @@ export function choiceCard(book, i, id) {
   if (i === 3) {
     const th = tryHero(book, id, 110, 'color');
     let extra = tryProps(id, th.f, [250, 110], 'color');
-    if (id === 'push' || id === 'lift') extra += pic('rock', 220, G + 2, 70);
-    if (id === 'pull') extra += ropeLine(th.f.right - 6, th.f.top + th.f.h * 0.5, 200, G - 26, 'color', 6) + pic('rock', 226, G + 2, 70);
+    // The heavy thing on the card is the same one that's in the story.
+    const heavy = (x) => (isBlock(book) ? `<g transform="translate(${x} ${G}) scale(.66) translate(${-x} ${-G})">${BLOCK_ART[book.picks[1]](x, 'color')}</g>` : pic('rock', x, G + 2, 70));
+    if (id === 'push' || id === 'lift') extra += heavy(222);
+    if (id === 'pull') extra += ropeLine(th.f.right - 6, th.f.top + th.f.h * 0.5, 200, G - 26, 'color', 6) + heavy(228);
     if (id === 'pullnet' || id === 'shake') extra += `<g transform="translate(-70 0)">${SPOT_ART.net('color').front}</g>`;
     return `<svg viewBox="30 80 240 200" class="cardpic" xmlns="http://www.w3.org/2000/svg">${extra}${th.svg}</svg>`;
   }

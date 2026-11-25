@@ -1,5 +1,5 @@
 // Offline support: keep every file of the app on the tablet.
-const VERSION = 'bf-v2';
+const VERSION = 'bf-v3';
 const FILES = [
 "./",
 "index.html",
@@ -83,6 +83,7 @@ const FILES = [
 "art/noto/hibiscus.svg",
 "art/noto/hook.svg",
 "art/noto/icecream.svg",
+"art/noto/jellyfish.svg",
 "art/noto/key.svg",
 "art/noto/kite.svg",
 "art/noto/ladder.svg",
@@ -140,6 +141,7 @@ const FILES = [
 "art/noto/trophy.svg",
 "art/noto/tropicalfish.svg",
 "art/noto/turtle.svg",
+"art/noto/ufo.svg",
 "art/noto/umbrella.svg",
 "art/noto/volcano.svg",
 "art/noto/watermelon.svg",
@@ -203,6 +205,7 @@ const FILES = [
 "art/noto-line/hibiscus.svg",
 "art/noto-line/hook.svg",
 "art/noto-line/icecream.svg",
+"art/noto-line/jellyfish.svg",
 "art/noto-line/key.svg",
 "art/noto-line/kite.svg",
 "art/noto-line/ladder.svg",
@@ -260,6 +263,7 @@ const FILES = [
 "art/noto-line/trophy.svg",
 "art/noto-line/tropicalfish.svg",
 "art/noto-line/turtle.svg",
+"art/noto-line/ufo.svg",
 "art/noto-line/umbrella.svg",
 "art/noto-line/volcano.svg",
 "art/noto-line/watermelon.svg",

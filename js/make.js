@@ -1,4 +1,4 @@
-// Making a book: main character, setting, problem, then six pages, then a title.
+// Making a book: main character, setting, then six pages (the problem is page 2), then a title.
 // One question per screen. Each choice is drawn from the ones before it, so the story hangs together.
 // The book is saved after every tap, so nothing is lost if the app closes.
 import * as store from './store.js';
@@ -7,11 +7,11 @@ import { el, iconButton, bigButton } from './ui.js';
 import * as S from './story.js';
 import { cover, sentence, pageSvg, STICKER_SIZE } from './bookview.js';
 
-const STEPS = ['hero', 'place', 'uhoh', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
+const STEPS = ['hero', 'place', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
 const MAX_STICKERS = 6;
 
 function newDraft() {
-  return { v: 2, step: 'hero', hero: null, place: null, uhoh: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: null };
+  return { v: 3, step: 'hero', hero: null, place: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: null };
 }
 
 const draft = () => store.get().draft;
@@ -19,11 +19,11 @@ const change = (fn) => store.update(s => fn(s.draft));
 
 export function start(app, go) {
   const d = draft();
-  if (!d || d.v !== 2) store.update(s => { s.draft = newDraft(); });
+  if (!d || d.v !== 3) store.update(s => { s.draft = newDraft(); });
   render(app, go);
 }
 
-export function hasDraft() { const d = draft(); return !!(d && d.v === 2 && d.hero); }
+export function hasDraft() { const d = draft(); return !!(d && d.v === 3 && d.hero); }
 export function discardDraft() { store.update(s => { s.draft = null; }); }
 
 const stepIndex = () => STEPS.indexOf(draft().step);
@@ -39,7 +39,7 @@ function render(app, go) {
   app.append(el('header', { class: 'topbar' }, iconButton('back', 'Back', back), dots, iconButton('home', 'Home', () => go('#/'))));
   const body = el('main', { class: 'make-body' });
   app.append(body);
-  if (['hero', 'place', 'uhoh'].includes(d.step)) setupStep(body, d.step, app, go);
+  if (['hero', 'place'].includes(d.step)) setupStep(body, d.step, app, go);
   else if (d.step.startsWith('p')) pageStep(body, +d.step.slice(1), app, go);
   else titleStep(body, app, go);
 }
@@ -56,10 +56,6 @@ function setupStep(body, step, app, go) {
   if (step === 'place') {
     q = 'Pick the setting.'; hint = 'The setting is where the story happens.';
     items = S.PLACES.map(p => ({ id: p.id, label: p.label, pic: S.placeCard(p.id) }));
-  }
-  if (step === 'uhoh') {
-    q = 'Pick the problem.'; hint = 'Every story needs a problem to fix!';
-    items = S.problemsFor(d).map(p => ({ id: p.type, label: S.uhohLabel(p.type), pic: S.uhohCard(d, p.type) }));
   }
   const chosen = d[step];
   const next = bigButton('Next', () => goStep(STEPS[STEPS.indexOf(step) + 1], app, go), 'next', 'next');
@@ -89,7 +85,6 @@ function setPart(step, id) {
     d.picks = [null, null, null, null, null, null];
     d.pools = {};
     d.title = null;
-    if (step !== 'uhoh' && !S.problemsFor(d).some(p => p.type === d.uhoh)) d.uhoh = null;
   });
 }
 
@@ -123,9 +118,6 @@ function pageStep(body, i, app, go) {
     if (stickerMode) wireStickers(art, i, draw);
   };
 
-  const block = draft().uhoh === 'block';
-  const QUESTIONS = ['What does the main character love to do?', block ? 'What is in the way?' : 'Where did it go?', 'What did they try first?', 'Who comes to help?', 'What surprise did they find?', 'What did they do at the end?'];
-
   const showChoices = () => {
     stickerMode = false;
     pageBox.classList.remove('sticking');
@@ -139,7 +131,8 @@ function pageStep(body, i, app, go) {
     const sync = () => { next.disabled = !chosen(); stick.disabled = !chosen(); };
     for (const id of pool) {
       const card = el('button', { class: 'card' + (chosen() === id ? ' on' : '') },
-        el('span', { class: 'card-pic', html: S.choiceCard(draft(), i, id) }), el('span', { class: 'card-word' }, S.cardWord(draft(), i, id)));
+        el('span', { class: 'card-pic', html: S.choiceCard(draft(), i, id) }), el('span', { class: 'card-word' }, S.cardWord(draft(), i, id)),
+        S.cardNote(draft(), i, id) ? el('span', { class: 'card-note' }, S.cardNote(draft(), i, id)) : null);
       card.addEventListener('click', () => {
         sfx.pick();
         setPick(i, id);
@@ -150,7 +143,7 @@ function pageStep(body, i, app, go) {
       grid.append(card);
     }
     sync();
-    side.append(el('p', { class: 'question' }, QUESTIONS[i - 1]), grid, el('div', { class: 'actions' }, stick, next));
+    side.append(el('p', { class: 'question' }, S.question(draft(), i)), grid, el('div', { class: 'actions' }, stick, next));
   };
 
   const showStickers = () => {
@@ -283,7 +276,7 @@ function finishBook(go) {
   const d = draft();
   const book = {
     v: 2, id: store.newId(), made: Date.now(),
-    hero: d.hero, place: d.place, uhoh: d.uhoh,
+    hero: d.hero, place: d.place, uhoh: S.typeOf(d),
     picks: d.picks.slice(), stickers: d.stickers.map(s => s.slice()), title: d.title, sold: 0,
   };
   store.addBook(book);
