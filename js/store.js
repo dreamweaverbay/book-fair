@@ -20,7 +20,7 @@ function load() {
     const d = DEFAULTS();
     // Books from the first test version (before story paths) can't be redrawn, so they're left out.
     const books = Array.isArray(p.books) ? p.books.filter(b => b && b.v === 2) : [];
-    const draft = p.draft && p.draft.v === 3 ? p.draft : null;
+    const draft = p.draft && (p.draft.v === 3 || p.draft.v === 4) ? p.draft : null;
     return { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) }, books, draft };
   } catch (e) {
     return DEFAULTS();

@@ -6,32 +6,55 @@ Plain static site: no accounts, no AI, no voices, no tracking. Works offline onc
 
 ## Making a book
 
-One question per screen, about ten minutes start to finish. The screens name the parts of a story as he goes: main character and setting first, then a label on each page (Beginning, Problem, First try, Help, Solution, Ending).
+One question per screen, about ten minutes start to finish. The screens name the parts of a story as he goes: main character, setting, and kind of story first, then a label on each page (Beginning, Problem, Help, Solution, Ending, and so on).
 
 1. **Main character:** Robot, Monster, Monster Truck, Shark, Fish, Berry (a fruit buddy), Sam (a stick-figure kid), Dragon, Big Lizard (an original character), Dino, Astronaut, Superhero.
 2. **Setting:** the fair, the beach, under the sea, the woods, the jungle (with a volcano), the truck arena, the ball park, the big city, the moon.
-3. **Six pages.** Each page asks one question and has one blank. He picks from up to four picture cards, the words drop into the blank, and the picture changes to match.
-4. **Title:** four titles built from his story, like "Shark and the Kite", "The Kite in the Palm Tree", "Dragon to the Rescue", "Shark and Dragon".
+3. **Kind of story:** a rescue, a race, or a mystery (see below). The mystery only shows up in settings where an animal could sneak off with a snack.
+4. **Six pages.** Each page asks one question and has one blank. He picks from up to four picture cards, the words drop into the blank, and the picture changes to match.
+5. **Title:** four titles built from his story, like "Shark and the Kite", "The Kite in the Palm Tree", "Dragon to the Rescue", "Shark and Dragon".
 
 ### Two rules for all content
 
 1. **If the words name it, the picture shows it, in that amount.**
 2. **Every card shows the exact words that drop into the blank,** so the cards always answer the question on the screen. "What did Shark take to the beach?" gets cards that say *a kite*, *a ball*, *a new hat*; the sentence becomes "Shark went to the beach with a kite."
 
-### How the stories stay sensible
+### Thinking pages
 
-Every choice is drawn from the ones before it (all of it lives in `js/story.js`):
+The rescue and the mystery each have one page where only some of the cards work, so he has to think about it. The screen says so ("Think about it! Only some of these will work."), and there are usually two cards that work and two that don't.
+
+- **Rescue, page 4 (Help):** "The kite is too high. Who can help?" Each card says what that friend is good at: *Dragon, can fly*; *Fish, is a good swimmer*. If he picks Fish, the picture shows Fish standing there with a question mark, the card fades, and a note says *Fish is a good swimmer. But the kite is too high for Fish! Who else can help?*
+- **Mystery, page 4 (Who did it?):** "Shark found tiny footprints. Who took the cake?" If he picks the worm: *A worm has no feet! Who else could it be?*
+
+A wrong pick costs nothing: no buzzer, no score, just the note and another try. The note is a sentence he can sound out, or a grown-up can read it with him and ask "why not?"
+
+### The three kinds of story
+
+| | Rescue | Race | Mystery |
+| --- | --- | --- | --- |
+| 1 | Beginning: what he took along | Beginning: who he raced | Beginning: what snack he took |
+| 2 | Problem: what happened to it | Goal: what the winner gets | Problem: the snack is gone, what clue he found |
+| 3 | First try: how he tried to get it back | Problem: what happened to him (slipped on a banana peel) | Clues: where the trail led |
+| 4 | Help (thinking page): who can help | Twist: what the leader stopped to do (took a nap) | Who did it? (thinking page): which animal fits the clue |
+| 5 | Solution: the surprise on it | Solution: how he got past | Solution: what he did about it (shared it) |
+| 6 | Ending | Ending | Ending |
+
+The race is the tortoise and the hare: whoever falls behind wins because the leader stops to show off. The mystery uses three clues (a feather, tiny footprints, a slimy trail), and the trail only leads somewhere up high if the clue was a feather. Each kind lives in its own file (`js/rescue.js`, `js/race.js`, `js/mystery.js`), with the characters and settings they share in `js/cast.js`.
+
+### How the rescue stays sensible
+
+Every choice is drawn from the ones before it:
 
 | Page | Part | The question | What decides the choices |
 | --- | --- | --- | --- |
 | 1 | Beginning | What did Shark take to the beach? | The setting decides the toys and rides: *a kite*, *a ball*, *a scooter* |
 | 2 | Problem | Oh no! What happened to the kite? | The toy and the setting decide what can go wrong: *blew into a palm tree*, *blew into the waves*. A ball rolls, a kite blows away, a ride gets its path blocked |
 | 3 | First try | What did Shark do to get it back? | The kind of spot decides the tries: too high means *jumped up*, *used a long stick*, *stood on a box* |
-| 4 | Help | Who came to help? | Only helpers whose skill fits the spot. The card says why: *Dragon, can fly* or *Dino, has a long, long neck* |
+| 4 | Help | The kite is too high. Who can help? | Two helpers whose skill fits the spot, and two whose skill doesn't. The card says why: *Dragon, can fly* or *Dino, has a long, long neck* |
 | 5 | Solution | Surprise! What was on the kite? | The helper uses that skill, and a small surprise fits the spot: *a bird* in a tree, *a frog* in the pond, *a worm* in the mud |
 | 6 | Ending | What did Shark and Dragon do next? | *flew the kite together*, *had a picnic*, *had a party*, *took a nap* |
 
-A spot is never offered if the main character could fix it alone (a shark never needs help getting something out of a pond) or if fewer than two helpers fit. `dev/check.mjs` (kept out of the repo) walks every main character, setting and choice to confirm that, that every sentence comes out whole, and that every card's words appear in its sentence. That makes 258 core plots (setting, toy, where it ends up) and roughly 260,000 complete books across all the choices.
+A spot is never offered if the main character could fix it alone (a shark never needs help getting something out of a pond) or if fewer than two helpers fit. `dev/check.mjs` (kept out of the repo) walks every main character, setting and choice to confirm that, that every sentence comes out whole, and that every card's words appear in its sentence. It also checks every thinking page has cards that work and cards that don't. Across all three kinds that comes to about 2,600 core plots and roughly 1.1 million complete books (rescue about 260,000, race about 785,000, mystery about 50,000).
 
 Example: *Shark went to the beach with a kite. / Oh no! The kite blew into a palm tree! / Shark jumped up, but the kite was too high. / Dragon came to help. Dragon can fly! / Dragon flew up and got the kite. It had a bird on it! / Then Shark and Dragon flew the kite together!*
 
@@ -79,7 +102,11 @@ index.html          app shell
 css/style.css       all styles, including the printed sheet
 js/app.js           home, shelf, a book's page, grown-up panel, router
 js/make.js          making a book, one question per screen
-js/story.js         characters, settings, problems, story paths, sentences, titles, and every page picture
+js/story.js         hands each question to the right kind of story
+js/cast.js          characters, settings, stickers, endings shared by every kind
+js/rescue.js        the rescue: problems, spots, helpers, the thinking page, sentences, titles, pictures
+js/race.js          the race
+js/mystery.js       the mystery
 js/spots.js         where things end up (tree tops, ponds, holes) and what blocks the path
 js/art.js           code-drawn characters and settings; the picture helper
 js/notobox.js       the visible box of each bundled picture

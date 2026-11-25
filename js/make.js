@@ -1,4 +1,4 @@
-// Making a book: main character, setting, then six pages (the problem is page 2), then a title.
+// Making a book: main character, setting, kind of story, then six pages, then a title.
 // One question per screen. Each choice is drawn from the ones before it, so the story hangs together.
 // The book is saved after every tap, so nothing is lost if the app closes.
 import * as store from './store.js';
@@ -7,11 +7,11 @@ import { el, iconButton, bigButton } from './ui.js';
 import * as S from './story.js';
 import { cover, sentence, pageSvg, STICKER_SIZE } from './bookview.js';
 
-const STEPS = ['hero', 'place', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
+const STEPS = ['hero', 'place', 'kind', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
 const MAX_STICKERS = 6;
 
 function newDraft() {
-  return { v: 3, step: 'hero', hero: null, place: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: null };
+  return { v: 4, step: 'hero', hero: null, place: null, shape: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: null };
 }
 
 const draft = () => store.get().draft;
@@ -19,11 +19,12 @@ const change = (fn) => store.update(s => fn(s.draft));
 
 export function start(app, go) {
   const d = draft();
-  if (!d || d.v !== 3) store.update(s => { s.draft = newDraft(); });
+  if (d && d.v === 3) store.update(s => { s.draft.v = 4; s.draft.shape = 'rescue'; }); // a book started before kinds of story
+  else if (!d || d.v !== 4) store.update(s => { s.draft = newDraft(); });
   render(app, go);
 }
 
-export function hasDraft() { const d = draft(); return !!(d && d.v === 3 && d.hero); }
+export function hasDraft() { const d = draft(); return !!(d && (d.v === 3 || d.v === 4) && d.hero); }
 export function discardDraft() { store.update(s => { s.draft = null; }); }
 
 const stepIndex = () => STEPS.indexOf(draft().step);
@@ -39,7 +40,7 @@ function render(app, go) {
   app.append(el('header', { class: 'topbar' }, iconButton('back', 'Back', back), dots, iconButton('home', 'Home', () => go('#/'))));
   const body = el('main', { class: 'make-body' });
   app.append(body);
-  if (['hero', 'place'].includes(d.step)) setupStep(body, d.step, app, go);
+  if (['hero', 'place', 'kind'].includes(d.step)) setupStep(body, d.step, app, go);
   else if (d.step.startsWith('p')) pageStep(body, +d.step.slice(1), app, go);
   else titleStep(body, app, go);
 }
@@ -57,17 +58,23 @@ function setupStep(body, step, app, go) {
     q = 'Pick the setting.'; hint = 'The setting is where the story happens.';
     items = S.PLACES.map(p => ({ id: p.id, label: p.label, pic: S.placeCard(p.id) }));
   }
-  const chosen = d[step];
+  if (step === 'kind') {
+    q = 'Pick the kind of story.'; hint = 'Every kind of story has a problem to solve.';
+    items = S.kindsFor(d).map(k => ({ id: k.id, label: k.name, note: k.blurb, pic: S.kindCard(d, k.id) }));
+  }
+  const field = step === 'kind' ? 'shape' : step;
+  const chosen = d[field];
   const next = bigButton('Next', () => goStep(STEPS[STEPS.indexOf(step) + 1], app, go), 'next', 'next');
   next.disabled = !chosen || !items.some(it => it.id === chosen);
 
   const grid = el('div', { class: 'cards cards-' + items.length + (step === 'place' ? ' places' : '') });
   for (const it of items) {
     const card = el('button', { class: 'card' + (chosen === it.id ? ' on' : ''), 'aria-pressed': chosen === it.id ? 'true' : 'false' },
-      el('span', { class: 'card-pic', html: it.pic }), el('span', { class: 'card-word' }, it.label));
+      el('span', { class: 'card-pic', html: it.pic }), el('span', { class: 'card-word' }, it.label),
+      it.note ? el('span', { class: 'card-note' }, it.note) : null);
     card.addEventListener('click', () => {
       sfx.pick();
-      setPart(step, it.id);
+      setPart(field, it.id);
       grid.querySelectorAll('.card').forEach(c => { c.classList.remove('on'); c.setAttribute('aria-pressed', 'false'); });
       card.classList.add('on'); card.setAttribute('aria-pressed', 'true');
       next.disabled = false;
@@ -85,6 +92,7 @@ function setPart(step, id) {
     d.picks = [null, null, null, null, null, null];
     d.pools = {};
     d.title = null;
+    if (step !== 'shape' && d.shape && !S.kindsFor(d).some(k => k.id === d.shape)) d.shape = null;
   });
 }
 
@@ -106,13 +114,15 @@ function pageStep(body, i, app, go) {
 
   const art = el('div', { class: 'bookpage-art' });
   const sent = el('div', { class: 'sentence-wrap' });
-  const pageBox = el('div', { class: 'bookpage making' }, el('div', { class: 'part-tag' }, S.pageJob(i)), art, sent, el('div', { class: 'pagenum' }, String(i)));
+  const pageBox = el('div', { class: 'bookpage making' }, el('div', { class: 'part-tag' }, S.pageJob(draft(), i)), art, sent, el('div', { class: 'pagenum' }, String(i)));
   const side = el('div', { class: 'side' });
   body.append(el('div', { class: 'pagestep' }, pageBox, side));
 
   let stickerMode = false;
+  let flop = null; // a choice that didn't fit, shown trying on a thinking page
+  const tried = new Set();
   const draw = () => {
-    art.innerHTML = pageSvg(draft(), i);
+    art.innerHTML = flop ? S.pageScene(draft(), i, 'color', undefined, flop) : pageSvg(draft(), i);
     sent.innerHTML = '';
     sent.append(sentence(draft(), i));
     if (stickerMode) wireStickers(art, i, draw);
@@ -129,12 +139,32 @@ function pageStep(body, i, app, go) {
       el('span', { class: 'stickerbtn-pics', html: S.stickersFor(draft().place).slice(0, 3).map(n => `<img src="art/noto/${n}.svg" alt="">`).join('') }),
       el('span', {}, 'Add stickers'));
     const sync = () => { next.disabled = !chosen(); stick.disabled = !chosen(); };
+    const think = S.isThinkPage(draft(), i);
+    const hintBox = el('div', { class: 'hintbox', 'aria-live': 'polite' });
+    if (think && !chosen()) hintBox.append(el('span', { class: 'hint-think' }, 'Think about it! Only some of these will work.'));
     for (const id of pool) {
-      const card = el('button', { class: 'card' + (chosen() === id ? ' on' : '') },
+      const card = el('button', { class: 'card' + (chosen() === id ? ' on' : '') + (tried.has(id) ? ' tried' : '') },
         el('span', { class: 'card-pic', html: S.choiceCard(draft(), i, id) }), el('span', { class: 'card-word' }, S.cardWord(draft(), i, id)),
         S.cardNote(draft(), i, id) ? el('span', { class: 'card-note' }, S.cardNote(draft(), i, id)) : null);
       card.addEventListener('click', () => {
+        const miss = think ? S.check(draft(), i, id) : null;
+        if (miss) {
+          // Not this one: show them giving it a try, say why it won't work, and let him pick again.
+          sfx.nope();
+          tried.add(id);
+          card.classList.add('tried');
+          flop = id;
+          if (chosen()) { setPick(i, null); grid.querySelectorAll('.card').forEach(c => c.classList.remove('on')); sync(); }
+          hintBox.innerHTML = '';
+          hintBox.append(el('span', { class: 'hint-say' }, miss.say), ' ', el('span', { class: 'hint-ask' }, miss.ask));
+          hintBox.classList.remove('pop'); void hintBox.offsetWidth; hintBox.classList.add('pop');
+          draw();
+          return;
+        }
         sfx.pick();
+        flop = null;
+        hintBox.innerHTML = '';
+        if (think) hintBox.append(el('span', { class: 'hint-yes' }, 'Yes! That works.'));
         setPick(i, id);
         grid.querySelectorAll('.card').forEach(c => c.classList.remove('on'));
         card.classList.add('on');
@@ -143,11 +173,12 @@ function pageStep(body, i, app, go) {
       grid.append(card);
     }
     sync();
-    side.append(el('p', { class: 'question' }, S.question(draft(), i)), grid, el('div', { class: 'actions' }, stick, next));
+    side.append(el('p', { class: 'question' }, S.question(draft(), i)), ...(think ? [hintBox] : []), grid, el('div', { class: 'actions' }, stick, next));
   };
 
   const showStickers = () => {
     stickerMode = true;
+    flop = null;
     pageBox.classList.add('sticking');
     side.innerHTML = '';
     const tray = el('div', { class: 'tray' });
@@ -276,7 +307,7 @@ function finishBook(go) {
   const d = draft();
   const book = {
     v: 2, id: store.newId(), made: Date.now(),
-    hero: d.hero, place: d.place, uhoh: S.typeOf(d),
+    hero: d.hero, place: d.place, shape: d.shape || 'rescue', ...S.extraFields(d),
     picks: d.picks.slice(), stickers: d.stickers.map(s => s.slice()), title: d.title, sold: 0,
   };
   store.addBook(book);

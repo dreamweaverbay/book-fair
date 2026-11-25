@@ -57,6 +57,7 @@ export const sfx = {
   tap() { if (on()) tone(620, 0, 0.07, { type: 'triangle', vol: 0.1 }); },
   pick() { if (on()) { tone(520, 0, 0.09, { type: 'triangle', vol: 0.14 }); tone(780, 0.05, 0.1, { type: 'triangle', vol: 0.1 }); } },
   page() { if (on()) noise(0, 0.28, { vol: 0.12, filter: 900, q: 0.7 }); },
+  nope() { if (on()) { tone(440, 0, 0.12, { type: 'sine', vol: 0.12, glideTo: 330 }); tone(330, 0.12, 0.16, { type: 'sine', vol: 0.1, glideTo: 262 }); } },
   sticker() { if (on()) tone(300, 0, 0.12, { type: 'sine', vol: 0.18, glideTo: 520 }); },
   unstick() { if (on()) tone(520, 0, 0.12, { type: 'sine', vol: 0.12, glideTo: 300 }); },
   coin() { if (on()) { tone(1320, 0, 0.12, { type: 'triangle', vol: 0.1 }); tone(1760, 0.05, 0.18, { type: 'sine', vol: 0.08 }); } },
