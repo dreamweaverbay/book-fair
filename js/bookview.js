@@ -40,7 +40,7 @@ export function byLine() {
 }
 
 // Each book's cover color follows its hero.
-const COVER = { robot: '#2f8fa8', monster: '#7d55bd', truck: '#c9433a', shark: '#4a6f93', fish: '#2f7fc1', strawberry: '#c94a5a', sam: '#3a74b8', dragon: '#2f8a4e', lizard: '#4f8f3e' };
+const COVER = { robot: '#2f8fa8', monster: '#7d55bd', truck: '#c9433a', shark: '#4a6f93', fish: '#2f7fc1', strawberry: '#c94a5a', sam: '#3a74b8', dragon: '#2f8a4e', lizard: '#4f8f3e', dino: '#3f8f6a', astronaut: '#3b4a7a', superhero: '#b8433f' };
 
 export function cover(book, { size = '', showSold = false } = {}) {
   const t = titleText(book);

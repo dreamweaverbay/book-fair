@@ -214,10 +214,10 @@ export function cardPic(markup, vb = '0 0 100 100') {
 /* ---------------- characters ---------------- */
 
 // Which way each picture faces on its own: -1 = left, 1 = right, 0 = straight at us.
-const FACING = { shark: -1, fish: -1, dragon: -1, truck: 1, duck: -1 };
+const FACING = { shark: -1, fish: -1, dragon: -1, truck: 1, duck: -1, tropicalfish: -1, dino: -1, superhero: 1 };
 
 // Heights in a scene (units of the 400 x 300 page).
-export const FIG_H = { robot: 124, monster: 114, truck: 92, shark: 94, fish: 70, strawberry: 88, sam: 120, dragon: 124, lizard: 156 };
+export const FIG_H = { robot: 124, monster: 114, truck: 92, shark: 94, fish: 70, strawberry: 88, sam: 120, dragon: 124, lizard: 156, astronaut: 116, dino: 132, superhero: 116 };
 
 // Draw a character standing at x on the ground line, facing 'left' or 'right'.
 export function figure(id, x, ground, o = {}) {
@@ -225,14 +225,14 @@ export function figure(id, x, ground, o = {}) {
   const w = h * aspect(id);
   const want = o.face === 'left' ? -1 : 1;
   const flip = FACING[id] ? FACING[id] !== want : false;
-  let svg = pic(id, x, ground, h, { flip, mode: o.mode });
-  if (id === 'strawberry') svg += berryFace(x, ground, h, o.mode);
+  let svg = pic(id, x, ground, h, { flip, mode: o.mode, rot: o.rot });
+  if (id === 'strawberry') svg += o.rot ? `<g transform="rotate(${o.rot} ${x} ${ground})">${berryFace(x, ground, h, o.mode)}</g>` : berryFace(x, ground, h, o.mode);
   const headX = x + (FACING[id] ? want : 0) * (HEADX[id] || 0) * w;
   return { svg, x, ground, h, w, top: ground - h, left: x - w / 2, right: x + w / 2, headY: ground - h * headFrac(id), headX, face: want };
 }
 
 // How far the head sits from the middle, as a share of width, for side-facing pictures.
-const HEADX = { shark: 0.2, fish: 0.24, dragon: 0.14, truck: 0.06 };
+const HEADX = { shark: 0.2, fish: 0.24, dragon: 0.14, truck: 0.06, dino: 0.36, superhero: 0.12 };
 
 // Where the top of the head is, as a share of height (for hats).
 function headFrac(id) { return { truck: 1, shark: 0.9, fish: 0.85, dragon: 1, sam: 1, robot: 0.9 }[id] || 1; }
@@ -280,7 +280,19 @@ export const FX_SCALE = { giant: 1.7, tiny: 0.45 };
 
 export const GROUND = 252;
 
-const line = (d, w = 1.4) => `<path d="${d}" fill="none" stroke="#3a3a3a" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+// A filled shape: colored on screen, white with an outline when printed as a coloring page.
+export function shape(d, color, mode, extra = '') {
+  return mode === 'line'
+    ? `<path d="${d}" fill="#fff" stroke="#3a3a3a" stroke-width="1.3" stroke-linejoin="round" vector-effect="non-scaling-stroke" ${extra}/>`
+    : `<path d="${d}" fill="${color}" ${extra}/>`;
+}
+export function ell(cx, cy, rx, ry, color, mode, extra = '') {
+  return mode === 'line'
+    ? `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fff" stroke="#3a3a3a" stroke-width="1.3" vector-effect="non-scaling-stroke" ${extra}/>`
+    : `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${color}" ${extra}/>`;
+}
+
+export const line = (d, w = 1.4) => `<path d="${d}" fill="none" stroke="#3a3a3a" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
 const sky = (top = '#cfe9f7', bottom = '#f3fbff') => {
   const id = nid('sky');
   return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bottom}"/></linearGradient></defs><rect width="400" height="300" fill="url(#${id})"/>`;
@@ -391,6 +403,45 @@ const PLACES = {
       `<rect y="212" width="400" height="88" fill="#d9d4ca"/><rect y="212" width="400" height="5" fill="#bdb6a9"/>` +
       `<path d="M0 232 H400" stroke="#c9c2b5" stroke-width="2"/>`;
   },
+};
+
+PLACES.space = (mode) => {
+  const stars = [[30, 30], [80, 70], [140, 24], [210, 52], [260, 18], [330, 40], [380, 80], [60, 140], [180, 110], [360, 140], [120, 170], [300, 120]];
+  if (mode === 'line') {
+    return stars.map(([x, y], i) => line(`M${x - 3} ${y} h6 M${x} ${y - 3} v6`, 0.8)).join('') +
+      line('M0 226 Q100 214 200 222 T400 220') + line('M60 246 q20 -8 40 0 M290 270 q26 -9 52 0', 1) +
+      pic('earth', 352, 92, 54, { mode });
+  }
+  return `<rect width="400" height="300" fill="#1e2546"/>` +
+    stars.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.3 : 2}" fill="#fff" opacity="${i % 2 ? 0.7 : 1}"/>`).join('') +
+    pic('earth', 352, 92, 54, { mode }) +
+    `<path d="M0 226 Q100 214 200 222 T400 220 V300 H0 Z" fill="#c9c6bd"/>` +
+    `<ellipse cx="80" cy="248" rx="26" ry="6" fill="#aeaaa0"/><ellipse cx="316" cy="272" rx="34" ry="7" fill="#aeaaa0"/><ellipse cx="190" cy="288" rx="18" ry="4" fill="#aeaaa0"/>`;
+};
+
+PLACES.jungle = (mode) => {
+  if (mode === 'line') {
+    return pic('volcano', 150, 196, 116, { mode }) + line('M0 196 Q120 180 220 192 T400 186') + line('M0 226 H400') +
+      pic('palm', 30, 236, 150, { mode }) + pic('palm', 376, 236, 140, { mode, flip: true });
+  }
+  return sky('#cfeee2', '#f1fbf3') + pic('cloud', 158, 70, 34, { mode }) + pic('volcano', 150, 196, 116, { mode }) +
+    `<path d="M0 196 Q120 180 220 192 T400 186 V300 H0 Z" fill="#7fc06a"/>` + `<rect y="222" width="400" height="78" fill="#5fae55"/>` +
+    `<ellipse cx="70" cy="226" rx="46" ry="16" fill="#3f8f45"/><ellipse cx="350" cy="228" rx="52" ry="16" fill="#3f8f45"/>` +
+    pic('palm', 30, 236, 150, { mode }) + pic('palm', 376, 236, 140, { mode, flip: true }) + pic('hibiscus', 92, 240, 20, { mode });
+};
+
+PLACES.park = (mode) => {
+  const posts = [10, 70, 130, 190, 250, 310, 370];
+  if (mode === 'line') {
+    return line('M0 164 H400 M0 206 H400') + posts.map(x => line(`M${x} 164 V206`, 1)).join('') + line('M0 226 H400') + line('M150 300 Q260 236 400 250', 1);
+  }
+  let mesh = '';
+  for (let x = -40; x < 440; x += 14) mesh += `M${x} 166 l40 40 M${x + 40} 166 l-40 40 `;
+  return sky('#c6e4f5', '#f2faff') + pic('sun', 352, 64, 40, { mode }) +
+    `<rect y="200" width="400" height="100" fill="#8fcf6e"/>` +
+    `<path d="M150 300 Q260 236 400 250 V300 Z" fill="#d9a86c"/>` +
+    `<path d="${mesh}" stroke="#a9b3bb" stroke-width="1.2" opacity=".8"/><path d="M0 164 H400 M0 206 H400" stroke="#8a929b" stroke-width="3"/>` +
+    posts.map(x => `<path d="M${x} 162 V208" stroke="#8a929b" stroke-width="4"/>`).join('');
 };
 
 export const PLACE_IDS = Object.keys(PLACES);

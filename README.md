@@ -6,31 +6,40 @@ Plain static site: no accounts, no AI, no voices, no tracking. Works offline onc
 
 ## Making a book
 
-One question per screen, about ten minutes start to finish.
+One question per screen, about ten minutes start to finish. The screens name the parts of a story as he goes: main character, setting, problem, then Beginning, Problem, First try, Help, Solution, Ending on the pages.
 
-1. **Who:** a hero, then a helper. Robot, Monster, Monster Truck, Shark, Fish, Berry (a fruit buddy), Sam (a stick-figure kid), Dragon, Big Lizard.
-2. **Where:** the fair, the beach, under the sea, the woods, the truck arena, the big city. It becomes the background on every page.
-3. **Uh-oh:** Lost!, Silly storm!, Way too big!, Stuck!, Mix-up! The cards show his hero in that kind of trouble.
-4. **Silly thing:** sock, cotton candy, duck, beach ball, banana peel. It saves the day on page 5.
-5. **Six pages.** Each page is one sentence with one blank. He picks from four picture cards, the blank fills in, and the page picture changes to match. Stickers are optional after each pick (drag on, drag off to remove, up to six a page).
-6. **Title:** "The ___ ___", picked like a Lure Lab bait name: a funny word (Giant, Tiny, Stinky, Sparkly, Soggy, Sleepy, Dizzy, Bouncy) and a second word taken from his own book. The cover shows it: a Giant Shark is drawn bigger, a Stinky Sock gets stink lines.
+1. **Main character:** Robot, Monster, Monster Truck, Shark, Fish, Berry (a fruit buddy), Sam (a stick-figure kid), Dragon, Big Lizard (an original character), Dino, Astronaut, Superhero.
+2. **Setting:** the fair, the beach, under the sea, the woods, the jungle (with a volcano), the truck arena, the ball park, the big city, the moon.
+3. **Problem:** two or three per setting, like *Blown away!*, *Rolled away!*, *In the way!*, *Volcano puff!*, *Floated away!*
+4. **Six pages.** Each page is one or two short sentences with one blank. He picks from up to four picture cards, the blank fills in, and the picture changes to match.
+5. **Title:** four titles built from his story, like "Shark and the Kite", "The Kite in the Palm Tree", "Dragon to the Rescue", "Shark and Dragon".
 
-The six pages always follow the same shape, so any choices make a story that holds together:
+### How the stories stay sensible
 
-| Page | Job | Example |
+Every choice is drawn from the ones before it (all of it lives in `js/story.js`):
+
+| Page | Part | What decides the choices |
 | --- | --- | --- |
-| 1 | Meet the hero | Shark lived at the beach and loved **pizza**. |
-| 2 | Uh-oh | One day, Shark lost a **kite**. |
-| 3 | First try | Shark looked in a **box**, but no kite. |
-| 4 | Second try | Robot came to help with a **map**. |
-| 5 | The fix | They found the kite under a **stinky** sock! |
-| 6 | The end | Then Shark and Robot had a big **picnic**! |
+| 1 | Beginning | The problem decides the toy (kite, balloon, ball, basketball…) or ride (bike, scooter, skateboard) |
+| 2 | Problem | The setting decides where the toy can end up: a palm tree, a tide pool, a crab hole. Or what blocks the path |
+| 3 | First try | The kind of spot decides the tries: too high means jump, long stick, stand on a box; too small means reach in, squeeze, crawl |
+| 4 | Help | Only helpers whose skill fits the spot: Dragon can fly, Dino has a long neck, Berry is very small, Monster Truck can pull hard |
+| 5 | Solution | The helper uses that skill, and a small surprise fits the spot: a bird in a tree, a frog in the pond, a worm in the mud |
+| 6 | Ending | Play with the toy together, or have a picnic, a party, or a nap |
+
+A spot is never offered if the main character could fix it alone (a shark never needs help getting something out of a pond) or if fewer than two helpers fit. `dev/check.mjs` (kept out of the repo) walks every main character, setting and choice to confirm that, and that every sentence comes out whole. That makes 285 core plots (setting, problem, toy, spot) and roughly 290,000 complete books across all the choices.
+
+Example: *Shark went to the beach to fly a kite. / Oh no! The wind blew the kite up into a palm tree! / Shark jumped up, but the kite was too high. / Dragon came to help. Dragon can fly! / Dragon flew up and got the kite. It had a bird on it! / Then Shark and Dragon flew the kite together!*
 
 Tapping any word in a sentence highlights it. Nothing is ever read aloud.
 
+### Stickers
+
+After he picks a word, **Add stickers** opens a tray of stickers that fit the setting (shells and crabs at the beach, planets and comets on the moon, parrots and monkeys in the jungle) plus a star and a heart. Tap a sticker to drop it on the page, or drag it where he wants it. Tap one on the page to take it off. Up to six per page.
+
 ### The one rule for all content
 
-If the words name it, the picture shows it, in that amount. "Cupcakes" draws three cupcakes; "a tiny sock" draws a tiny sock; "but no kite" shows no kite. When adding or changing anything in `js/story.js`, check the picture against the sentence. `dev/pages.html` (kept out of the repo) renders every choice on every page for checking.
+If the words name it, the picture shows it, in that amount. When adding or changing anything in `js/story.js`, check the picture against the sentence. `dev/books.html` renders whole books or every option for one page.
 
 ## The fair
 
@@ -68,8 +77,9 @@ index.html          app shell
 css/style.css       all styles, including the printed sheet
 js/app.js           home, shelf, a book's page, grown-up panel, router
 js/make.js          making a book, one question per screen
-js/story.js         story parts, sentences, choice pools, and every page picture
-js/art.js           code-drawn characters, silly things, places; the picture helper
+js/story.js         characters, settings, problems, story paths, sentences, titles, and every page picture
+js/spots.js         where things end up (tree tops, ponds, holes) and what blocks the path
+js/art.js           code-drawn characters and settings; the picture helper
 js/notobox.js       the visible box of each bundled picture
 js/bookview.js      covers, pages, sentences, stickers
 js/reader.js        reading a finished book
@@ -84,6 +94,6 @@ fonts/              Andika (reading) and Baloo 2 (headings), SIL Open Font Licen
 sw.js               offline support
 ```
 
-Pictures: shark, fish, berry, dragon, and all the objects are Noto Emoji (credit and license in `art/noto/README.md`). Robot, Monster, Monster Truck, Sam, Big Lizard (an original character), the sock, cotton candy, rubber duck, beach ball, banana peel, and all six places are drawn in code in `js/art.js`, each with a color look and an outline look.
+Pictures: Shark, Fish, Berry, Dragon, Dino, Astronaut, Superhero, and most objects are Noto Emoji (credit and license in `art/noto/README.md`). Robot, Monster, Monster Truck, Sam, Big Lizard, the beach ball, the settings, and the spots (towers, ponds, holes, the backboard, and so on) are drawn in code in `js/art.js` and `js/spots.js`, each with a color look and an outline look.
 
 When files are added, update the list in `sw.js` and change its `VERSION` so tablets pick up the new copy.

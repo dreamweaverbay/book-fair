@@ -18,7 +18,10 @@ function load() {
     if (!raw) return DEFAULTS();
     const p = JSON.parse(raw);
     const d = DEFAULTS();
-    return { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) }, books: Array.isArray(p.books) ? p.books : [] };
+    // Books from the first test version (before story paths) can't be redrawn, so they're left out.
+    const books = Array.isArray(p.books) ? p.books.filter(b => b && b.v === 2) : [];
+    const draft = p.draft && p.draft.v === 2 ? p.draft : null;
+    return { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) }, books, draft };
   } catch (e) {
     return DEFAULTS();
   }
@@ -43,7 +46,7 @@ export function importData(text) {
   const p = JSON.parse(text);
   if (!p || p.version !== 1 || !Array.isArray(p.books)) throw new Error('Not a Book Fair backup');
   const d = DEFAULTS();
-  state = { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) } };
+  state = { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) }, books: p.books.filter(b => b && b.v === 2) };
   save();
 }
 

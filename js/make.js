@@ -1,39 +1,33 @@
-// Making a book: story parts first, then six pages, then a title.
-// One question per screen. The book is saved after every tap, so nothing is lost if the app closes.
+// Making a book: main character, setting, problem, then six pages, then a title.
+// One question per screen. Each choice is drawn from the ones before it, so the story hangs together.
+// The book is saved after every tap, so nothing is lost if the app closes.
 import * as store from './store.js';
 import { sfx } from './sound.js';
 import { el, iconButton, bigButton } from './ui.js';
 import * as S from './story.js';
 import { cover, sentence, pageSvg, STICKER_SIZE } from './bookview.js';
 
-const STEPS = ['hero', 'side', 'place', 'uhoh', 'silly', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
+const STEPS = ['hero', 'place', 'uhoh', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'title'];
 const MAX_STICKERS = 6;
 
 function newDraft() {
-  return { step: 'hero', hero: null, side: null, place: null, uhoh: null, silly: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: { a: null, n: null } };
+  return { v: 2, step: 'hero', hero: null, place: null, uhoh: null, picks: [null, null, null, null, null, null], pools: {}, stickers: [[], [], [], [], [], []], title: null };
 }
 
 const draft = () => store.get().draft;
 const change = (fn) => store.update(s => fn(s.draft));
 
 export function start(app, go) {
-  if (!draft()) store.update(s => { s.draft = newDraft(); });
+  const d = draft();
+  if (!d || d.v !== 2) store.update(s => { s.draft = newDraft(); });
   render(app, go);
 }
 
-export function hasDraft() {
-  const d = draft();
-  return !!(d && d.hero);
-}
-
+export function hasDraft() { const d = draft(); return !!(d && d.v === 2 && d.hero); }
 export function discardDraft() { store.update(s => { s.draft = null; }); }
 
-function stepIndex() { return STEPS.indexOf(draft().step); }
-
-function goStep(step, app, go) {
-  change(d => { d.step = step; });
-  render(app, go);
-}
+const stepIndex = () => STEPS.indexOf(draft().step);
+function goStep(step, app, go) { change(d => { d.step = step; }); render(app, go); }
 
 function render(app, go) {
   const d = draft();
@@ -42,35 +36,34 @@ function render(app, go) {
   const idx = stepIndex();
   const back = () => (idx === 0 ? go('#/') : goStep(STEPS[idx - 1], app, go));
   const dots = el('div', { class: 'dots', 'aria-hidden': 'true' }, STEPS.map((s, k) => el('span', { class: 'dot' + (k < idx ? ' done' : k === idx ? ' now' : '') })));
-  const top = el('header', { class: 'topbar' },
-    iconButton('back', 'Back', back),
-    dots,
-    iconButton('home', 'Home', () => go('#/')));
-  app.append(top);
+  app.append(el('header', { class: 'topbar' }, iconButton('back', 'Back', back), dots, iconButton('home', 'Home', () => go('#/'))));
   const body = el('main', { class: 'make-body' });
   app.append(body);
-  const step = d.step;
-  if (['hero', 'side', 'place', 'uhoh', 'silly'].includes(step)) setupStep(body, step, app, go);
-  else if (step.startsWith('p')) pageStep(body, +step.slice(1), app, go);
-  else if (step === 'title') titleStep(body, app, go);
+  if (['hero', 'place', 'uhoh'].includes(d.step)) setupStep(body, d.step, app, go);
+  else if (d.step.startsWith('p')) pageStep(body, +d.step.slice(1), app, go);
+  else titleStep(body, app, go);
 }
 
 /* ---------------- story parts ---------------- */
 
 function setupStep(body, step, app, go) {
   const d = draft();
-  let q, items, chosen = d[step];
-  if (step === 'hero') { q = 'Who is your hero?'; items = S.HEROES.map(h => ({ id: h.id, label: h.name, pic: S.heroCard(h.id) })); }
-  if (step === 'side') { q = `Who helps ${S.hero(d.hero).name}?`; items = S.HEROES.filter(h => h.id !== d.hero).map(h => ({ id: h.id, label: h.name, pic: S.heroCard(h.id) })); }
-  if (step === 'place') { q = `Where does ${S.hero(d.hero).name} live?`; items = S.PLACES.map(p => ({ id: p.id, label: p.label, pic: S.placeCard(p.id), wide: true })); }
-  if (step === 'uhoh') { q = 'What goes wrong?'; items = S.UHOHS.map(u => ({ id: u.id, label: u.label, pic: S.uhohCard(d, u.id) })); }
-  if (step === 'silly') { q = 'Pick a silly thing. It will matter later!'; items = S.SILLY.map(s => ({ id: s.id, label: s.word, pic: S.sillyCard(s.id) })); }
-
-  const next = bigButton('Next', () => {
-    const order = STEPS.indexOf(step);
-    goStep(STEPS[order + 1], app, go);
-  }, 'next', 'next');
-  next.disabled = !chosen;
+  let q, hint, items;
+  if (step === 'hero') {
+    q = 'Pick the main character.'; hint = 'The main character is who the story is about.';
+    items = S.HEROES.map(h => ({ id: h.id, label: h.name, pic: S.heroCard(h.id) }));
+  }
+  if (step === 'place') {
+    q = 'Pick the setting.'; hint = 'The setting is where the story happens.';
+    items = S.PLACES.map(p => ({ id: p.id, label: p.label, pic: S.placeCard(p.id) }));
+  }
+  if (step === 'uhoh') {
+    q = 'Pick the problem.'; hint = 'Every story needs a problem to fix!';
+    items = S.problemsFor(d).map(p => ({ id: p.type, label: S.uhohLabel(p.type), pic: S.uhohCard(d, p.type) }));
+  }
+  const chosen = d[step];
+  const next = bigButton('Next', () => goStep(STEPS[STEPS.indexOf(step) + 1], app, go), 'next', 'next');
+  next.disabled = !chosen || !items.some(it => it.id === chosen);
 
   const grid = el('div', { class: 'cards cards-' + items.length + (step === 'place' ? ' places' : '') });
   for (const it of items) {
@@ -85,34 +78,40 @@ function setupStep(body, step, app, go) {
     });
     grid.append(card);
   }
-  body.append(el('div', { class: 'setup' }, el('h1', { class: 'question' }, q), grid, el('div', { class: 'actions' }, next)));
+  body.append(el('div', { class: 'setup' }, el('div', { class: 'qbox' }, el('h1', { class: 'question' }, q), el('p', { class: 'qhint' }, hint)), grid, el('div', { class: 'actions' }, next)));
 }
 
-// Changing a story part keeps the rest of the book that still fits.
+// Changing an early choice clears the pages that depended on it.
 function setPart(step, id) {
   change(d => {
-    const before = d[step];
+    if (d[step] === id) return;
     d[step] = id;
-    if (step === 'hero' && d.side === id) d.side = null;
-    if (step === 'uhoh' && before && before !== id) {
-      for (let i = 2; i <= 5; i++) { d.picks[i - 1] = null; delete d.pools[i]; }
-      if (d.title && d.title.n === 'thing') d.title.n = null;
-    }
-    if ((step === 'hero' || step === 'side') && id === 'fish' && d.picks[1] === 'fishhat') { d.picks[1] = null; delete d.pools[2]; }
-    if ((step === 'hero' || step === 'side') && id === 'fish' && d.pools[2]) delete d.pools[2];
+    d.picks = [null, null, null, null, null, null];
+    d.pools = {};
+    d.title = null;
+    if (step !== 'uhoh' && !S.problemsFor(d).some(p => p.type === d.uhoh)) d.uhoh = null;
+  });
+}
+
+function setPick(i, id) {
+  change(d => {
+    if (d.picks[i - 1] === id) return;
+    d.picks[i - 1] = id;
+    // Later pages may no longer fit, so they start fresh.
+    for (let k = i + 1; k <= 6; k++) { d.picks[k - 1] = null; delete d.pools[k]; }
+    d.title = null;
   });
 }
 
 /* ---------------- pages ---------------- */
 
 function pageStep(body, i, app, go) {
-  const d = draft();
-  if (!d.pools[i]) change(dd => { dd.pools[i] = S.poolFor(dd, i); });
+  if (!draft().pools[i] || !draft().pools[i].length) change(dd => { dd.pools[i] = S.poolFor(dd, i); });
   const pool = draft().pools[i];
 
   const art = el('div', { class: 'bookpage-art' });
   const sent = el('div', { class: 'sentence-wrap' });
-  const pageBox = el('div', { class: 'bookpage making' }, art, sent, el('div', { class: 'pagenum' }, String(i)));
+  const pageBox = el('div', { class: 'bookpage making' }, el('div', { class: 'part-tag' }, S.pageJob(i)), art, sent, el('div', { class: 'pagenum' }, String(i)));
   const side = el('div', { class: 'side' });
   body.append(el('div', { class: 'pagestep' }, pageBox, side));
 
@@ -121,25 +120,29 @@ function pageStep(body, i, app, go) {
     art.innerHTML = pageSvg(draft(), i);
     sent.innerHTML = '';
     sent.append(sentence(draft(), i));
-    if (stickerMode) wireStickerDrag(art, i, draw);
+    if (stickerMode) wireStickers(art, i, draw);
   };
+
+  const block = draft().uhoh === 'block';
+  const QUESTIONS = ['What does the main character love to do?', block ? 'What is in the way?' : 'Where did it go?', 'What did they try first?', 'Who comes to help?', 'What surprise did they find?', 'What did they do at the end?'];
 
   const showChoices = () => {
     stickerMode = false;
     pageBox.classList.remove('sticking');
     side.innerHTML = '';
     const chosen = () => draft().picks[i - 1];
-    const grid = el('div', { class: 'cards cards-4 choices' });
-    const next = bigButton(i < 6 ? 'Next page' : 'Name my book', () => goStep(i < 6 ? 'p' + (i + 1) : 'title', app, go), 'next', 'next');
-    const stick = bigButton('Stickers', () => showStickers(), 'ghost', 'star');
+    const grid = el('div', { class: 'cards cards-' + Math.min(pool.length, 4) + ' choices' });
+    const next = bigButton(i < 6 ? 'Next page' : 'Pick a title', () => goStep(i < 6 ? 'p' + (i + 1) : 'title', app, go), 'next', 'next');
+    const stick = el('button', { class: 'stickerbtn', onclick: () => { sfx.tap(); showStickers(); } },
+      el('span', { class: 'stickerbtn-pics', html: S.stickersFor(draft().place).slice(0, 3).map(n => `<img src="art/noto/${n}.svg" alt="">`).join('') }),
+      el('span', {}, 'Add stickers'));
     const sync = () => { next.disabled = !chosen(); stick.disabled = !chosen(); };
     for (const id of pool) {
-      const it = S.ITEMS[id];
       const card = el('button', { class: 'card' + (chosen() === id ? ' on' : '') },
-        el('span', { class: 'card-pic', html: S.choiceCard(draft(), i, id) }), el('span', { class: 'card-word' }, it.word));
+        el('span', { class: 'card-pic', html: S.choiceCard(draft(), i, id) }), el('span', { class: 'card-word' }, S.cardWord(draft(), i, id)));
       card.addEventListener('click', () => {
         sfx.pick();
-        change(dd => { dd.picks[i - 1] = id; });
+        setPick(i, id);
         grid.querySelectorAll('.card').forEach(c => c.classList.remove('on'));
         card.classList.add('on');
         draw(); sync();
@@ -147,7 +150,7 @@ function pageStep(body, i, app, go) {
       grid.append(card);
     }
     sync();
-    side.append(el('p', { class: 'question' }, 'Pick a picture to finish the page.'), grid, el('div', { class: 'actions' }, stick, next));
+    side.append(el('p', { class: 'question' }, QUESTIONS[i - 1]), grid, el('div', { class: 'actions' }, stick, next));
   };
 
   const showStickers = () => {
@@ -155,14 +158,14 @@ function pageStep(body, i, app, go) {
     pageBox.classList.add('sticking');
     side.innerHTML = '';
     const tray = el('div', { class: 'tray' });
-    for (const n of S.STICKERS) {
-      const tile = el('div', { class: 'tile', 'data-n': n, role: 'button', 'aria-label': n + ' sticker' }, el('img', { src: `art/noto/${n}.svg`, alt: '', draggable: 'false' }));
+    for (const n of S.stickersFor(draft().place)) {
+      const tile = el('div', { class: 'tile', role: 'button', 'aria-label': n + ' sticker', 'data-n': n }, el('img', { src: `art/noto/${n}.svg`, alt: '', draggable: 'false' }));
       tile.addEventListener('pointerdown', (e) => startDrag(e, n, art, i, draw));
       tray.append(tile);
     }
     side.append(
-      el('p', { class: 'question' }, 'Drag stickers onto your page.'),
-      el('p', { class: 'hint' }, 'Drag one off the page to take it away.'),
+      el('p', { class: 'question' }, 'Add stickers to your page.'),
+      el('p', { class: 'hint' }, 'Tap a sticker, or drag it where you want it. Tap one on the page to take it off.'),
       tray,
       el('div', { class: 'actions' }, bigButton('Done', () => showChoices(), 'next', 'check')));
     draw();
@@ -172,33 +175,54 @@ function pageStep(body, i, app, go) {
   showChoices();
 }
 
-// Dragging a sticker from the tray (or one already on the page) with a finger.
+/* ---------------- stickers ----------------
+   Tap a sticker to drop it in an open spot, or drag it where you want it.
+   Tap one on the page to take it off, or drag it to move it. */
+
+const OPEN_SPOTS = [[46, 40], [354, 40], [200, 28], [120, 34], [280, 34], [46, 150], [354, 150]];
+
+function addSticker(i, name, x, y) {
+  if (draft().stickers[i - 1].length >= MAX_STICKERS) return false;
+  const h = STICKER_SIZE / 2;
+  change(dd => { dd.stickers[i - 1].push({ n: name, x: clamp(x, h, 400 - h), y: clamp(y, h, 300 - h) }); });
+  return true;
+}
+
 function startDrag(e, name, art, i, draw, fromIndex = null) {
   e.preventDefault();
-  const svg = art.querySelector('svg');
-  const rect = svg.getBoundingClientRect();
+  const rect = art.querySelector('svg').getBoundingClientRect();
   const px = (rect.width / 400) * STICKER_SIZE;
-  const ghost = el('img', { src: `art/noto/${name}.svg`, class: 'drag-ghost', alt: '', style: { width: px + 'px', height: px + 'px' } });
-  document.body.append(ghost);
-  const move = (ev) => { ghost.style.left = ev.clientX - px / 2 + 'px'; ghost.style.top = ev.clientY - px / 2 + 'px'; };
-  move(e);
-  if (fromIndex !== null) { change(dd => { dd.stickers[i - 1].splice(fromIndex, 1); }); draw(); }
+  const sx = e.clientX, sy = e.clientY;
+  let moved = false, ghost = null;
+  const move = (ev) => {
+    if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 8) {
+      moved = true;
+      ghost = el('img', { src: `art/noto/${name}.svg`, class: 'drag-ghost', alt: '', style: { width: px + 'px', height: px + 'px' } });
+      document.body.append(ghost);
+      if (fromIndex !== null) { change(dd => { dd.stickers[i - 1].splice(fromIndex, 1); }); draw(); }
+    }
+    if (ghost) { ghost.style.left = ev.clientX - px / 2 + 'px'; ghost.style.top = ev.clientY - px / 2 + 'px'; }
+  };
   const up = (ev) => {
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     window.removeEventListener('pointercancel', up);
-    ghost.remove();
-    const r = art.querySelector('svg').getBoundingClientRect();
-    const inside = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
-    const list = draft().stickers[i - 1];
-    if (inside && list.length < MAX_STICKERS) {
-      const pt = toPage(art.querySelector('svg'), ev.clientX, ev.clientY);
-      const h = STICKER_SIZE / 2;
-      change(dd => { dd.stickers[i - 1].push({ n: name, x: clamp(pt.x, h, 400 - h), y: clamp(pt.y, h, 300 - h) }); });
-      sfx.sticker();
-    } else if (fromIndex !== null || !inside) {
-      if (fromIndex !== null) sfx.unstick();
+    if (ghost) ghost.remove();
+    if (!moved) {
+      if (fromIndex !== null) { change(dd => { dd.stickers[i - 1].splice(fromIndex, 1); }); sfx.unstick(); }
+      else {
+        const used = draft().stickers[i - 1];
+        const spot = OPEN_SPOTS.find(([x, y]) => !used.some(s => Math.hypot(s.x - x, s.y - y) < 30)) || OPEN_SPOTS[used.length % OPEN_SPOTS.length];
+        if (addSticker(i, name, spot[0], spot[1])) sfx.sticker();
+      }
+      draw();
+      return;
     }
+    const svgNow = art.querySelector('svg');
+    const r = svgNow.getBoundingClientRect();
+    const inside = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+    if (inside) { const pt = toPage(svgNow, ev.clientX, ev.clientY); if (addSticker(i, name, pt.x, pt.y)) sfx.sticker(); }
+    else if (fromIndex !== null) sfx.unstick();
     draw();
   };
   window.addEventListener('pointermove', move);
@@ -206,7 +230,7 @@ function startDrag(e, name, art, i, draw, fromIndex = null) {
   window.addEventListener('pointercancel', up);
 }
 
-function wireStickerDrag(art, i, draw) {
+function wireStickers(art, i, draw) {
   art.querySelectorAll('g.st').forEach(g => {
     g.addEventListener('pointerdown', (e) => {
       const k = +g.dataset.k;
@@ -219,83 +243,48 @@ function wireStickerDrag(art, i, draw) {
 function toPage(svg, cx, cy) {
   const p = svg.createSVGPoint();
   p.x = cx; p.y = cy;
-  const m = svg.getScreenCTM();
-  const q = p.matrixTransform(m.inverse());
-  return { x: q.x, y: q.y };
+  return p.matrixTransform(svg.getScreenCTM().inverse());
 }
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 /* ---------------- title ---------------- */
 
 function titleStep(body, app, go) {
-  const d = draft();
-  const nouns = S.titleNouns(d);
-  if (d.title.n && !nouns.some(n => n.id === d.title.n)) change(dd => { dd.title.n = null; });
-
   const preview = el('div', { class: 'title-preview' });
   const side = el('div', { class: 'side' });
   body.append(el('div', { class: 'pagestep titlestep' }, preview, side));
-
-  const finish = bigButton('Finish my book', () => finishBook(app, go), 'next', 'check');
+  const finish = bigButton('Finish my book', () => finishBook(go), 'next', 'check');
   const drawCover = () => {
     preview.innerHTML = '';
     preview.append(cover(draft(), { size: 'big' }));
-    finish.disabled = !(draft().title.a && draft().title.n);
-    buildLine();
+    finish.disabled = !draft().title;
   };
-
-  const line = el('div', { class: 'title-build' });
-  const buildLine = () => {
-    line.innerHTML = '';
-    const t = draft().title;
-    const nWord = t.n ? nouns.find(n => n.id === t.n).word : null;
-    line.append(el('span', {}, 'The'),
-      el('span', { class: 'tslot g1' + (t.a ? ' filled' : '') }, t.a || '1'),
-      el('span', { class: 'tslot g2' + (nWord ? ' filled' : '') }, nWord || '2'));
-  };
-
-  const group = (n, label, list, key) => {
-    const box = el('div', { class: 'wordgroup g' + n },
-      el('div', { class: 'wordgroup-head' }, el('span', { class: 'num' }, String(n)), label));
-    const wrap = el('div', { class: 'words' });
-    for (const w of list) {
-      const id = key === 'a' ? w : w.id;
-      const text = key === 'a' ? w : w.word;
-      const b = el('button', { class: 'word' + (draft().title[key] === id ? ' on' : '') }, text);
-      b.addEventListener('click', () => {
-        sfx.pick();
-        change(dd => { dd.title[key] = id; });
-        wrap.querySelectorAll('.word').forEach(x => x.classList.remove('on'));
-        b.classList.add('on');
-        drawCover();
-      });
-      wrap.append(b);
-    }
-    box.append(wrap);
-    return box;
-  };
-
-  const surprise = el('button', { class: 'smallbtn', onclick: () => {
-    sfx.pick();
-    change(dd => { dd.title.a = S.TITLE_WORDS[Math.floor(Math.random() * S.TITLE_WORDS.length)]; dd.title.n = nouns[Math.floor(Math.random() * nouns.length)].id; });
-    render(app, go);
-  } }, 'Surprise me');
-
+  const list = el('div', { class: 'titles' });
+  for (const o of S.titleOptions(draft())) {
+    const b = el('button', { class: 'titlechoice' + (draft().title === o.id ? ' on' : '') }, o.text);
+    b.addEventListener('click', () => {
+      sfx.pick();
+      change(dd => { dd.title = o.id; });
+      list.querySelectorAll('.titlechoice').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      drawCover();
+    });
+    list.append(b);
+  }
   side.append(
-    el('p', { class: 'question' }, 'Name your book. Pick a funny word and a second word.'),
-    el('div', { class: 'title-line' }, line, surprise),
-    group(1, 'Funny word', S.TITLE_WORDS, 'a'),
-    group(2, 'Who or what', nouns, 'n'),
+    el('p', { class: 'question' }, 'Pick a title for your book.'),
+    el('p', { class: 'qhint left' }, 'A good title tells what the story is about.'),
+    list,
     el('div', { class: 'actions' }, finish));
   drawCover();
 }
 
-function finishBook(app, go) {
+function finishBook(go) {
   const d = draft();
   const book = {
-    id: store.newId(), made: Date.now(),
-    hero: d.hero, side: d.side, place: d.place, uhoh: d.uhoh, silly: d.silly,
-    picks: d.picks.slice(), stickers: d.stickers.map(s => s.slice()), title: { ...d.title }, sold: 0,
+    v: 2, id: store.newId(), made: Date.now(),
+    hero: d.hero, place: d.place, uhoh: d.uhoh,
+    picks: d.picks.slice(), stickers: d.stickers.map(s => s.slice()), title: d.title, sold: 0,
   };
   store.addBook(book);
   sfx.done();
@@ -319,4 +308,3 @@ export function doneScreen(app, go, id) {
           bigButton('My shelf', () => go('#/shelf'), 'ghost'),
           bigButton('Make another book', () => go('#/make'), 'ghost', 'plus')))));
 }
-
