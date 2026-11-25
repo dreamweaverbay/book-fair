@@ -1,5 +1,5 @@
 // Offline support: keep every file of the app on the tablet.
-const VERSION = 'bf-v3';
+const VERSION = 'bf-v4';
 const FILES = [
 "./",
 "index.html",
